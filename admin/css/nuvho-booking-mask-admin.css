@@ -1,0 +1,170 @@
+/**
+ * Admin styles for Nuvho Booking Mask
+ */
+
+/* Admin layout */
+.nuvho-admin-columns {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 20px -10px;
+}
+
+.nuvho-admin-column {
+    flex: 1;
+    min-width: 300px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+/* Cards styling */
+.nuvho-settings-card,
+.nuvho-preview-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.nuvho-settings-card h2,
+.nuvho-preview-card h2 {
+    margin-top: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Preview section */
+.nuvho-booking-preview {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f0f0f1;
+    border-radius: 4px;
+}
+
+.nuvho-preview-row {
+    margin-bottom: 10px;
+}
+
+.nuvho-preview-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.nuvho-preview-row input,
+.nuvho-preview-row select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.nuvho-shortcode-info {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    border-left: 4px solid #2271b1;
+}
+
+.nuvho-shortcode-info code {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #f0f0f1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin: 8px 0;
+    font-family: Consolas, Monaco, monospace;
+}
+
+/* Reports page styling */
+.nuvho-reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.nuvho-date-filter select {
+    min-width: 150px;
+}
+
+.nuvho-metrics-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px 20px;
+}
+
+.nuvho-metric-card {
+    flex: 1;
+    min-width: 180px;
+    padding: 20px;
+    margin: 0 10px 20px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.nuvho-metric-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+.nuvho-metric-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2271b1;
+}
+
+.nuvho-charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px 20px;
+}
+
+.nuvho-chart-card {
+    flex: 1;
+    min-width: 300px;
+    padding: 20px;
+    margin: 0 10px 20px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.nuvho-chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.nuvho-table-card {
+    padding: 0;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.nuvho-table-card h2 {
+    padding: 15px 20px;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .nuvho-admin-column {
+        flex: 100%;
+    }
+    
+    .nuvho-chart-card {
+        flex: 100%;
+    }
+    
+    .nuvho-metric-card {
+        flex: 1 0 40%;
+    }
+}

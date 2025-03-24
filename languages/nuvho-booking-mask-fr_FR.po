@@ -1,0 +1,61 @@
+# Copyright (C) 2025 Odysseus Ambut / Herobe
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: Nuvho Booking Mask (Single) 2.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/nuvho-booking-mask\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: French <fr@li.org>\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-03-23T00:00:00+00:00\n"
+"PO-Revision-Date: 2025-03-23 10:00+0100\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Domain: nuvho-booking-mask\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. Plugin Name of the plugin
+msgid "Nuvho Booking Mask (Single)"
+msgstr "Nuvho Masque de Réservation (Unique)"
+
+#. Plugin URI of the plugin
+msgid "https://support.herobe.com/nuvho-booking-mask/"
+msgstr "https://support.herobe.com/nuvho-booking-mask/"
+
+#. Description of the plugin
+msgid "Nuvho Single Booking Mask. Universal booking mask for single property. Easy to use, no coding required. Customizable, responsive, multilingual, GDPR compliant."
+msgstr "Masque de réservation Nuvho pour propriété unique. Masque de réservation universel pour une propriété unique. Facile à utiliser, sans codage nécessaire. Personnalisable, responsive, multilingue, conforme au RGPD."
+
+#. Author of the plugin
+msgid "Odysseus Ambut / Herobe"
+msgstr "Odysseus Ambut / Herobe"
+
+#. Author URI of the plugin
+msgid "https://herobe.com"
+msgstr "https://herobe.com"
+
+#: admin/partials/nuvho-booking-mask-admin-reports.php:137
+msgid "No data available for the selected period."
+msgstr "Aucune donnée disponible pour la période sélectionnée."
+
+#: public/partials/nuvho-booking-mask-public-display.php:33
+msgid "Check-in"
+msgstr "Arrivée"
+
+#: public/partials/nuvho-booking-mask-public-display.php:38
+msgid "Check-out"
+msgstr "Départ"
+
+#: public/partials/nuvho-booking-mask-public-display.php:43
+msgid "Adults"
+msgstr "Adultes"
+
+#: public/partials/nuvho-booking-mask-public-display.php:51
+msgid "Children"
+msgstr "Enfants"
+
+#: admin/class-nuvho-booking-mask-admin.php:261
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Vous n'avez pas les autorisations suffisantes pour accéder à cette page."

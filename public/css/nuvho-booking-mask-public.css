@@ -1,0 +1,208 @@
+/**
+ * Public styles for Nuvho Booking Mask
+ */
+
+/* Container styling */
+.nuvho-booking-mask-container {
+    padding: 20px;
+    margin: 20px 0;
+    box-sizing: border-box;
+}
+
+/* Form layout */
+.nuvho-booking-form {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.nuvho-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+
+.nuvho-form-field {
+    flex: 1;
+    min-width: 150px;
+    padding: 0 10px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+/* Form elements */
+.nuvho-booking-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.nuvho-booking-form input[type="text"],
+.nuvho-booking-form input[type="date"],
+.nuvho-booking-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+}
+
+.nuvho-booking-form button {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 30px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nuvho-booking-form button:hover {
+    opacity: 0.9;
+}
+
+/* Date range picker */
+.nuvho-date-range {
+    flex: 2;
+}
+
+.nuvho-date-inputs {
+    position: relative;
+}
+
+.nuvho-date-picker {
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+    background-repeat: no-repeat;
+    background-position: calc(100% - 10px) center;
+    background-size: 16px;
+    padding-right: 30px;
+}
+
+/* DateRangePicker customization */
+.daterangepicker {
+    font-family: inherit;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000 !important;
+}
+
+.daterangepicker .calendar-table {
+    border-radius: 4px;
+}
+
+.daterangepicker td.active, 
+.daterangepicker td.active:hover,
+.daterangepicker td.in-range.active {
+    background-color: #4c7380 !important;
+    border-color: #4c7380 !important;
+    color: #fff !important;
+}
+
+.daterangepicker td.in-range {
+    background-color: rgba(76, 115, 128, 0.2);
+    color: #333;
+    border-color: transparent;
+}
+
+.daterangepicker .drp-selected {
+    font-weight: 600;
+}
+
+.daterangepicker.show-calendar .drp-buttons {
+    border-top: 1px solid #ddd;
+}
+
+.daterangepicker .drp-buttons .btn {
+    border-radius: 4px;
+    padding: 4px 12px;
+}
+
+.daterangepicker .drp-buttons .btn.btn-primary {
+    background-color: #4c7380;
+    border-color: #4c7380;
+}
+
+.daterangepicker .drp-buttons .btn.btn-default {
+    background-color: #f8f8f8;
+    border-color: #ddd;
+}
+
+.daterangepicker:after {
+    border-bottom-color: #fff;
+}
+
+.daterangepicker:before {
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+    .daterangepicker {
+        width: 100%;
+        left: 0 !important;
+        right: 0 !important;
+    }
+    
+    .daterangepicker .drp-calendar {
+        max-width: 100%;
+    }
+    
+    .daterangepicker.ltr .drp-calendar.left {
+        clear: both;
+    }
+}
+
+/* Responsive datepicker */
+@media screen and (max-width: 768px) {
+    .ui-datepicker.ui-datepicker-multi {
+        width: 100% !important;
+    }
+    
+    .ui-datepicker-multi .ui-datepicker-group {
+        width: 100% !important;
+        float: none;
+        margin-bottom: 10px;
+    }
+}
+
+/* Submit field */
+.nuvho-submit-field {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+}
+
+/* Promo code field */
+.nuvho-promo-field {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.nuvho-promo-field input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .nuvho-form-field {
+        flex: 1 0 50%;
+    }
+    
+    .nuvho-submit-field {
+        flex: 1 0 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .nuvho-form-field {
+        flex: 1 0 100%;
+    }
+}
