@@ -43,6 +43,7 @@ class Nuvho_Booking_Mask_Activator {
             'button_border_radius' => 'Square',
             'booking_mask_border_radius' => 'Square',
             'font' => 'Default',
+            'guest_selection_type' => 'dropdown',
             // Accor-specific settings
             'code_hotel' => '',
             'goto' => 'fiche_hotel',

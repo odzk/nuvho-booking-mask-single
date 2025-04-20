@@ -89,11 +89,90 @@ $opacity_options = array(
 <div class="wrap">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
     
-    <div class="nuvho-admin-columns">
-        <div class="nuvho-admin-column">
-            <form method="post" action="options.php">
-                <?php settings_fields('nuvho_booking_mask_settings_group'); ?>
+    <!-- Live Preview - completely separate section at the top -->
+    <div class="nuvho-preview-section">
+        <div class="nuvho-preview-card">
+            <h2>Live Preview</h2>
+            <div class="nuvho-booking-preview">
+                <?php 
+                // Calculate border radius based on settings
+                $border_radius = '0';
+                if ($settings['booking_mask_border_radius'] === 'Rounded') {
+                    $border_radius = '8px';
+                } elseif ($settings['booking_mask_border_radius'] === 'Pill') {
+                    $border_radius = '20px';
+                }
                 
+                // Calculate button border radius
+                $button_radius = '0';
+                if ($settings['button_border_radius'] === 'Rounded') {
+                    $button_radius = '8px';
+                } elseif ($settings['button_border_radius'] === 'Pill') {
+                    $button_radius = '20px';
+                }
+                
+                // Calculate opacity
+                $opacity = str_replace('%', '', $settings['background_opacity']) / 100;
+                ?>
+                <div id="nuvho-preview-container" style="
+                    background-color: <?php echo esc_attr($settings['background_color']); ?>;
+                    opacity: <?php echo esc_attr($opacity); ?>;
+                    border-radius: <?php echo esc_attr($border_radius); ?>;
+                    padding: 20px;
+                    max-width: 100%;
+                ">
+                    <div style="
+                        color: <?php echo esc_attr($settings['font_color']); ?>;
+                        font-family: <?php echo $settings['font'] === 'Default' ? 'inherit' : esc_attr($settings['font']); ?>;
+                    ">
+                        <div class="nuvho-booking-form-preview">
+                            <div class="nuvho-preview-row">
+                                <label>Check-in / Check-out</label>
+                                <input type="text" placeholder="Select dates" readonly>
+                            </div>
+                            <div class="nuvho-preview-row">
+                                <label>Guests</label>
+                                <select>
+                                    <option>1 Adult</option>
+                                    <option>2 Adults</option>
+                                </select>
+                            </div>
+                            <?php if (isset($settings['show_promo_code']) && $settings['show_promo_code']) : ?>
+                            <div id="nuvho-preview-promo-field" class="nuvho-preview-row">
+                                <label>Promo Code</label>
+                                <input type="text" placeholder="Enter promo code" readonly>
+                            </div>
+                            <?php endif; ?>
+                            <div class="nuvho-preview-row">
+                                <label>&nbsp;</label>
+                                <button style="
+                                    background-color: <?php echo esc_attr($settings['button_color']); ?>;
+                                    color: <?php echo esc_attr($settings['button_text_color']); ?>;
+                                    border-radius: <?php echo esc_attr($button_radius); ?>;
+                                    border: none;
+                                    padding: 8px 16px;
+                                    cursor: pointer;
+                                "><?php echo esc_html($settings['button_text']); ?></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nuvho-shortcode-info">
+                <h3>Shortcode</h3>
+                <p>Use this shortcode to display the booking mask on any page or post:</p>
+                <code>[nuvho_booking_mask_single]</code>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings form - PROPERLY STRUCTURED -->
+    <form method="post" action="options.php">
+        <?php settings_fields('nuvho_booking_mask_settings_group'); ?>
+        
+        <div class="nuvho-admin-columns">
+            <div class="nuvho-admin-column">
                 <div class="nuvho-settings-card">
                     <h2>Basic Settings</h2>
                     <table class="form-table">
@@ -232,7 +311,9 @@ $opacity_options = array(
                         </tr>
                     </table>
                 </div>
-                
+            </div>
+            
+            <div class="nuvho-admin-column">
                 <div class="nuvho-settings-card">
                     <h2>Appearance Settings</h2>
                     <table class="form-table">
@@ -305,6 +386,17 @@ $opacity_options = array(
                         </tr>
                         
                         <tr>
+                            <th scope="row">Guest Selection Type:</th>
+                            <td>
+                                <select name="nuvho_booking_mask_settings[guest_selection_type]">
+                                    <option value="dropdown" <?php selected(isset($settings['guest_selection_type']) ? $settings['guest_selection_type'] : 'dropdown', 'dropdown'); ?>>Dropdown</option>
+                                    <option value="stepper" <?php selected(isset($settings['guest_selection_type']) ? $settings['guest_selection_type'] : 'dropdown', 'stepper'); ?>>Stepper</option>
+                                </select>
+                                <p class="description">Choose how guests can select the number of adults and children. Dropdown uses standard select menus. Stepper uses +/- buttons to increment or decrement values.</p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
                             <th scope="row">Font:</th>
                             <td>
                                 <select name="nuvho_booking_mask_settings[font]">
@@ -318,83 +410,7 @@ $opacity_options = array(
                 </div>
                 
                 <?php submit_button('Save Changes', 'primary', 'submit', true); ?>
-            </form>
-        </div>
-        
-        <div class="nuvho-admin-column">
-            <div class="nuvho-preview-card">
-                <h2>Live Preview</h2>
-                <div class="nuvho-booking-preview">
-                    <?php 
-                    // Calculate border radius based on settings
-                    $border_radius = '0';
-                    if ($settings['booking_mask_border_radius'] === 'Rounded') {
-                        $border_radius = '8px';
-                    } elseif ($settings['booking_mask_border_radius'] === 'Pill') {
-                        $border_radius = '20px';
-                    }
-                    
-                    // Calculate button border radius
-                    $button_radius = '0';
-                    if ($settings['button_border_radius'] === 'Rounded') {
-                        $button_radius = '8px';
-                    } elseif ($settings['button_border_radius'] === 'Pill') {
-                        $button_radius = '20px';
-                    }
-                    
-                    // Calculate opacity
-                    $opacity = str_replace('%', '', $settings['background_opacity']) / 100;
-                    ?>
-                    <div id="nuvho-preview-container" style="
-                        background-color: <?php echo esc_attr($settings['background_color']); ?>;
-                        opacity: <?php echo esc_attr($opacity); ?>;
-                        border-radius: <?php echo esc_attr($border_radius); ?>;
-                        padding: 20px;
-                        max-width: 100%;
-                    ">
-                        <div style="
-                            color: <?php echo esc_attr($settings['font_color']); ?>;
-                            font-family: <?php echo $settings['font'] === 'Default' ? 'inherit' : esc_attr($settings['font']); ?>;
-                        ">
-                            <div class="nuvho-booking-form-preview">
-                                <div class="nuvho-preview-row">
-                                    <label>Check-in / Check-out</label>
-                                    <input type="text" placeholder="Select dates" readonly>
-                                </div>
-                                <div class="nuvho-preview-row">
-                                    <label>Guests</label>
-                                    <select>
-                                        <option>1 Adult</option>
-                                        <option>2 Adults</option>
-                                    </select>
-                                </div>
-                                <?php if (isset($settings['show_promo_code']) && $settings['show_promo_code']) : ?>
-                                <div id="nuvho-preview-promo-field" class="nuvho-preview-row">
-                                    <label>Promo Code</label>
-                                    <input type="text" placeholder="Enter promo code" readonly>
-                                </div>
-                                <?php endif; ?>
-                                <div class="nuvho-preview-row">
-                                    <button style="
-                                        background-color: <?php echo esc_attr($settings['button_color']); ?>;
-                                        color: <?php echo esc_attr($settings['button_text_color']); ?>;
-                                        border-radius: <?php echo esc_attr($button_radius); ?>;
-                                        border: none;
-                                        padding: 8px 16px;
-                                        cursor: pointer;
-                                    "><?php echo esc_html($settings['button_text']); ?></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nuvho-shortcode-info">
-                    <h3>Shortcode</h3>
-                    <p>Use this shortcode to display the booking mask on any page or post:</p>
-                    <code>[nuvho_booking_mask_single]</code>
-                </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>

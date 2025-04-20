@@ -54,4 +54,15 @@ function run_nuvho_booking_mask() {
     $plugin = new Nuvho_Booking_Mask();
     $plugin->run();
 }
+
+/**
+ * Plugin update checker
+ */
+
+require_once NUVHO_BOOKING_MASK_PLUGIN_DIR . 'vendor/plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+    'https://updates.herobe.com/nuvho-booking-mask-single.json',
+    __FILE__, 'nuvho-booking-mask-single');
 run_nuvho_booking_mask();

@@ -19,6 +19,7 @@
     display: flex;
     flex-wrap: wrap;
     margin: 0 -10px;
+    align-items: flex-end;
 }
 
 .nuvho-form-field {
@@ -27,6 +28,16 @@
     padding: 0 10px;
     margin-bottom: 15px;
     box-sizing: border-box;
+}
+
+/* Bottom row with promo code and submit button */
+.nuvho-bottom-row {
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.nuvho-form-spacer {
+    flex-grow: 1;
 }
 
 /* Form elements */
@@ -40,7 +51,7 @@
 .nuvho-booking-form input[type="date"],
 .nuvho-booking-form select {
     width: 100%;
-    padding: 10px;
+    padding: 20px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
     background-color: rgba(255, 255, 255, 0.9);
@@ -48,9 +59,7 @@
 }
 
 .nuvho-booking-form button {
-    width: 100%;
     padding: 12px 20px;
-    margin-top: 30px;
     border: none;
     cursor: pointer;
     font-size: 16px;
@@ -138,8 +147,273 @@
     border-bottom-color: rgba(0, 0, 0, 0.2);
 }
 
+/* Submit field - bottom right aligned */
+.nuvho-submit-field {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.nuvho-submit-field button[type="submit"] {
+    padding: 20px 40px;
+    font-size: 16px;
+    font-weight: 500;
+    width: auto;
+    margin-top: 0;
+    height: 63px; /* Match height of other inputs */
+    box-sizing: border-box;
+}
+
+/* Original stepper controls - keeping for backward compatibility */
+.nuvho-stepper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+}
+
+.nuvho-stepper input[type="number"] {
+    flex: 1;
+    width: 100%;
+    border: none;
+    padding: 10px 5px;
+    text-align: center;
+    -moz-appearance: textfield; /* Remove number spinner in Firefox */
+    background-color: transparent;
+}
+
+.nuvho-stepper input::-webkit-outer-spin-button,
+.nuvho-stepper input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.nuvho-stepper-btn {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.05);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0;
+    transition: background-color 0.2s ease;
+}
+
+.nuvho-stepper-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.nuvho-stepper-btn:active {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Promo field styling */
+.nuvho-promo-field {
+    flex: 0 0 300px;
+}
+
+.nuvho-promo-field input {
+    width: 100%;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+}
+
+/* NEW: Guest Selector Styles */
+.nuvho-guest-selector-container {
+    position: relative;
+    margin-bottom: 15px;
+    flex: 1;
+}
+
+.nuvho-guest-trigger {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 16px;
+    height: 63px; /* Match the height of other inputs */
+    box-sizing: border-box;
+}
+
+.nuvho-guest-count {
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.nuvho-guest-count strong {
+    font-weight: 700;
+    line-height: 1;
+    margin-right: 5px;
+}
+
+.nuvho-selector-toggle {
+    color: #4c7380;
+    font-size: 16px;
+}
+
+/* Modal styling */
+.nuvho-guest-modal {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-top: 5px;
+    max-width: 500px;
+    overflow: hidden;
+}
+
+.nuvho-modal-content {
+    padding: 20px;
+}
+
+.nuvho-room-title {
+    font-size: 18px;
+    font-weight: 500;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.nuvho-guest-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.nuvho-guest-label {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+/* Stepper buttons */
+.nuvho-stepper-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.nuvho-circle-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    transition: background-color 0.2s;
+}
+
+.nuvho-decrease {
+    background-color: #4c7380;
+    color: white;
+}
+
+.nuvho-increase {
+    background-color: #4c7380;
+    color: white;
+}
+
+.nuvho-increase:hover, .nuvho-decrease:hover {
+    background-color: #3a6a7c;
+}
+
+.nuvho-btn-icon {
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 0;
+}
+
+.nuvho-decrease.disabled {
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+/* Modal buttons */
+.nuvho-modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.nuvho-cancel-btn {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    width: auto;
+}
+
+.nuvho-done-btn {
+    padding: 12px 30px;
+    background: #4c7380;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    width: auto;
+}
+
+.nuvho-done-btn:hover {
+    background: #3a6a7c;
+}
+
 /* Responsive adjustments */
-@media (max-width: 767px) {
+@media screen and (max-width: 768px) {
+    .nuvho-form-field {
+        flex: 1 0 50%;
+    }
+    
+    .nuvho-date-range {
+        flex: 1 0 100%;
+    }
+    
+    .nuvho-promo-field {
+        flex: 1 0 60%;
+    }
+    
+    .nuvho-submit-field {
+        flex: 0 0 auto;
+    }
+    
+    .ui-datepicker.ui-datepicker-multi {
+        width: 100% !important;
+    }
+    
+    .ui-datepicker-multi .ui-datepicker-group {
+        width: 100% !important;
+        float: none;
+        margin-bottom: 10px;
+    }
+    
     .daterangepicker {
         width: 100%;
         left: 0 !important;
@@ -153,56 +427,31 @@
     .daterangepicker.ltr .drp-calendar.left {
         clear: both;
     }
-}
-
-/* Responsive datepicker */
-@media screen and (max-width: 768px) {
-    .ui-datepicker.ui-datepicker-multi {
-        width: 100% !important;
+    
+    .nuvho-guest-trigger {
+        padding: 15px;
     }
     
-    .ui-datepicker-multi .ui-datepicker-group {
-        width: 100% !important;
-        float: none;
-        margin-bottom: 10px;
-    }
-}
-
-/* Submit field */
-.nuvho-submit-field {
-    display: flex;
-    align-items: flex-end;
-    flex-direction: column;
-}
-
-/* Promo code field */
-.nuvho-promo-field {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.nuvho-promo-field input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.9);
-    box-sizing: border-box;
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {
-    .nuvho-form-field {
-        flex: 1 0 50%;
+    .nuvho-circle-btn {
+        width: 40px;
+        height: 40px;
     }
     
-    .nuvho-submit-field {
-        flex: 1 0 100%;
+    .nuvho-modal-content {
+        padding: 15px;
     }
 }
 
 @media screen and (max-width: 480px) {
     .nuvho-form-field {
         flex: 1 0 100%;
+    }
+    
+    .nuvho-submit-field {
+        flex: 1 0 100%;
+    }
+    
+    .nuvho-submit-field button[type="submit"] {
+        width: 100%;
     }
 }

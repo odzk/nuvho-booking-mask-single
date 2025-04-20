@@ -73,6 +73,9 @@ class Nuvho_Booking_Mask_Public {
         wp_enqueue_script('daterangepicker', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js', array('jquery', 'moment'), '3.1.0', false);
         wp_enqueue_script($this->plugin_name, NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public.js', array('jquery', 'moment', 'daterangepicker'), $this->version, false);
         
+        // Add the direct URL override for Simple Booking v2
+        wp_enqueue_script($this->plugin_name . '-direct-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-direct-override.js', array('jquery', $this->plugin_name), $this->version, false);
+        
         // Localize script with settings data
         $settings = get_option('nuvho_booking_mask_settings');
         
@@ -110,10 +113,12 @@ class Nuvho_Booking_Mask_Public {
         
         $localized_data = array_merge($settings, array(
             'locale' => $locale,
-            'date_format' => $date_format
+            'date_format' => $date_format,
+            'lang' => strtoupper(substr(explode(' ', $settings['language'])[0], 0, 2)),
+            'currency' => $settings['currency']
         ));
         
-        wp_localize_script($this->plugin_name, 'nuvhoBookingMaskSettings', $localized_data);
+        wp_localize_script($this->plugin_name, 'nuvhoBookingSettings', $localized_data);
     }
 
     /**

@@ -33,7 +33,7 @@
                 opens: 'center',
                 autoApply: true,
                 locale: {
-                    format: nuvhoBookingMaskSettings.date_format,
+                    format: nuvhoBookingSettings.date_format || 'MM/DD/YYYY',
                     applyLabel: 'Apply',
                     cancelLabel: 'Cancel',
                     fromLabel: 'From',
@@ -47,7 +47,6 @@
                     ],
                     firstDay: 1
                 },
-                // Apply custom colors to match the plugin's theme
                 autoUpdateInput: true
             }, function(start, end, label) {
                 // Update hidden inputs with the selected dates in YYYY-MM-DD format
@@ -56,8 +55,8 @@
             });
             
             // Set language if specified
-            if (nuvhoBookingMaskSettings.locale && nuvhoBookingMaskSettings.locale !== 'en') {
-                moment.locale(nuvhoBookingMaskSettings.locale);
+            if (nuvhoBookingSettings.locale && nuvhoBookingSettings.locale !== 'en') {
+                moment.locale(nuvhoBookingSettings.locale);
             }
             
             // Apply custom styling to match the rest of the form
@@ -66,22 +65,184 @@
             }, 100);
         });
         
+        // Initialize original stepper controls if present (backward compatibility)
+        $(document).on('click', '.nuvho-stepper-btn', function() {
+            var input = $(this).data('input');
+            var inputField = $('#' + input);
+            var currentValue = parseInt(inputField.val());
+            var minValue = parseInt(inputField.attr('min'));
+            var maxValue = parseInt(inputField.attr('max'));
+            
+            if ($(this).hasClass('nuvho-stepper-plus')) {
+                // Handle plus button
+                if (currentValue < maxValue) {
+                    inputField.val(currentValue + 1);
+                }
+            } else if ($(this).hasClass('nuvho-stepper-minus')) {
+                // Handle minus button
+                if (currentValue > minValue) {
+                    inputField.val(currentValue - 1);
+                }
+            }
+        });
+        
+        // *** NEW GUEST SELECTOR FUNCTIONALITY ***
+        
+        // Elements
+        const guestTrigger = $('.nuvho-guest-trigger');
+        const guestModal = $('.nuvho-guest-modal');
+        const cancelBtn = $('.nuvho-cancel-btn');
+        const doneBtn = $('.nuvho-done-btn');
+        
+        // Counters and displays
+        const adultCountDisplay = $('.nuvho-adults-display');
+        const kidsCountDisplay = $('.nuvho-kids-display');
+        const adultCountSummary = $('.nuvho-adults-count');
+        const kidsCountSummary = $('.nuvho-kids-count');
+        
+        // Hidden inputs
+        const adultInput = $('#nuvho-adults-input');
+        const kidsInput = $('#nuvho-kids-input');
+        
+        // State variables
+        let tempAdults = parseInt(adultInput.val()) || 2;
+        let tempKids = parseInt(kidsInput.val()) || 0;
+        let originalAdults, originalKids;
+        
+        // Open modal
+        guestTrigger.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent the click from propagating to document
+            
+            // Store original values in case of cancel
+            originalAdults = tempAdults;
+            originalKids = tempKids;
+            
+            // Show the modal
+            guestModal.fadeIn(200);
+            
+            // Update displays in modal
+            updateDisplays();
+            checkButtonStates();
+        });
+        
+        // Close modal on Cancel button click
+        cancelBtn.on('click', function(e) {
+            e.preventDefault();
+            closeModalWithoutSaving();
+        });
+        
+        // Save values on Done button click
+        doneBtn.on('click', function(e) {
+            e.preventDefault();
+            
+            // Update hidden inputs
+            adultInput.val(tempAdults);
+            kidsInput.val(tempKids);
+            
+            // Update summary display
+            adultCountSummary.text(tempAdults);
+            kidsCountSummary.text(tempKids);
+            
+            // Close the modal
+            guestModal.fadeOut(200);
+        });
+        
+        // Close modal when clicking outside
+        $(document).on('click', function(e) {
+            if (guestModal.is(':visible') && 
+                !guestModal.is(e.target) && 
+                guestModal.has(e.target).length === 0 && 
+                !guestTrigger.is(e.target) && 
+                guestTrigger.has(e.target).length === 0) {
+                
+                closeModalWithoutSaving();
+            }
+        });
+        
+        // Stop propagation for clicks inside the modal
+        guestModal.on('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Increment/Decrement buttons
+        $('.nuvho-circle-btn').on('click', function() {
+            const target = $(this).data('target');
+            const isIncrease = $(this).hasClass('nuvho-increase');
+            
+            if (target === 'adults') {
+                if (isIncrease && tempAdults < 10) {
+                    tempAdults++;
+                } else if (!isIncrease && tempAdults > 1) {
+                    tempAdults--;
+                }
+            } else if (target === 'kids') {
+                if (isIncrease && tempKids < 10) {
+                    tempKids++;
+                } else if (!isIncrease && tempKids > 0) {
+                    tempKids--;
+                }
+            }
+            
+            // Update displays both in modal and in summary (real-time update)
+            updateDisplays();
+            updateSummaryDisplay();
+            checkButtonStates();
+        });
+        
+        // Helper functions
+        function updateDisplays() {
+            adultCountDisplay.text(tempAdults);
+            kidsCountDisplay.text(tempKids);
+        }
+        
+        function updateSummaryDisplay() {
+            // Update the summary display in real-time
+            adultCountSummary.text(tempAdults);
+            kidsCountSummary.text(tempKids);
+        }
+        
+        function checkButtonStates() {
+            // Adults buttons
+            $('.nuvho-decrease[data-target="adults"]')
+                .toggleClass('disabled', tempAdults <= 1);
+                
+            $('.nuvho-increase[data-target="adults"]')
+                .toggleClass('disabled', tempAdults >= 10);
+                
+            // Kids buttons
+            $('.nuvho-decrease[data-target="kids"]')
+                .toggleClass('disabled', tempKids <= 0);
+                
+            $('.nuvho-increase[data-target="kids"]')
+                .toggleClass('disabled', tempKids >= 10);
+        }
+        
+        function closeModalWithoutSaving() {
+            // Reset to original values
+            tempAdults = originalAdults;
+            tempKids = originalKids;
+            
+            // Reset the summary display to original values
+            adultCountSummary.text(originalAdults);
+            kidsCountSummary.text(originalKids);
+            
+            // Close the modal
+            guestModal.fadeOut(200);
+        }
+        
+        // Initialize displays
+        adultCountSummary.text(adultInput.val() || '2');
+        kidsCountSummary.text(kidsInput.val() || '0');
+        
+        // END OF GUEST SELECTOR FUNCTIONALITY
+        
         // Track booking form submissions
         $(document).on('submit', '#nuvho-booking-form', function() {
-            // Get current page URL
-            const currentUrl = window.location.href;
-            const separator = currentUrl.indexOf('?') > -1 ? '&' : '?';
-            const trackingUrl = currentUrl + separator + 'nuvho_track=click';
+            // Track the click
+            trackBookingClick();
             
-            // Use fetch API to track the click (async, don't delay the form submission)
-            fetch(trackingUrl, {
-                method: 'GET',
-                credentials: 'same-origin'
-            }).catch(function(error) {
-                console.error('Tracking error:', error);
-            });
-            
-            // Check if the form has the required fields filled
+            // Only allow the form submission if dates are selected
             const checkin = $(this).find('#nuvho-checkin').val();
             const checkout = $(this).find('#nuvho-checkout').val();
             
@@ -90,9 +251,24 @@
                 return false;
             }
             
-            // Continue with form submission
             return true;
         });
     });
+
+    // Function to track booking clicks (can be called from other scripts)
+    window.trackBookingClick = function() {
+        // Get current page URL
+        const currentUrl = window.location.href;
+        const separator = currentUrl.indexOf('?') > -1 ? '&' : '?';
+        const trackingUrl = currentUrl + separator + 'nuvho_track=click';
+        
+        // Use fetch API to track the click (async, don't delay the form submission)
+        fetch(trackingUrl, {
+            method: 'GET',
+            credentials: 'same-origin'
+        }).catch(function(error) {
+            console.error('Tracking error:', error);
+        });
+    };
 
 })(jQuery);
