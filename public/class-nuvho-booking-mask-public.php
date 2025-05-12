@@ -75,6 +75,9 @@ class Nuvho_Booking_Mask_Public {
         
         // Add the direct URL override for Simple Booking v2
         wp_enqueue_script($this->plugin_name . '-direct-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-direct-override.js', array('jquery', $this->plugin_name), $this->version, false);
+
+        // Add the Cloudbeds URL override
+        wp_enqueue_script($this->plugin_name . '-cloudbeds-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-cloudbeds-override.js', array('jquery', $this->plugin_name), $this->version, false);
         
         // Localize script with settings data
         $settings = get_option('nuvho_booking_mask_settings');
@@ -225,6 +228,11 @@ class Nuvho_Booking_Mask_Public {
         
         // Calculate opacity
         $opacity = str_replace('%', '', $settings['background_opacity']) / 100;
+
+        // For Simple Booking v2, we need to append the hotel_id to the URL
+        if ($settings['option'] === 'Simple Booking v2') {
+            $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
+        }
 
         // Convert background color to rgba with opacity
         $bg_color = $settings['background_color'];
