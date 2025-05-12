@@ -91,81 +91,125 @@ $opacity_options = array(
     
     <!-- Live Preview - completely separate section at the top -->
     <div class="nuvho-preview-section">
-        <div class="nuvho-preview-card">
-            <h2>Live Preview</h2>
-            <div class="nuvho-booking-preview">
-                <?php 
-                // Calculate border radius based on settings
-                $border_radius = '0';
-                if ($settings['booking_mask_border_radius'] === 'Rounded') {
-                    $border_radius = '8px';
-                } elseif ($settings['booking_mask_border_radius'] === 'Pill') {
-                    $border_radius = '20px';
-                }
-                
-                // Calculate button border radius
-                $button_radius = '0';
-                if ($settings['button_border_radius'] === 'Rounded') {
-                    $button_radius = '8px';
-                } elseif ($settings['button_border_radius'] === 'Pill') {
-                    $button_radius = '20px';
-                }
-                
-                // Calculate opacity
-                $opacity = str_replace('%', '', $settings['background_opacity']) / 100;
-                ?>
-                <div id="nuvho-preview-container" style="
-                    background-color: <?php echo esc_attr($settings['background_color']); ?>;
-                    opacity: <?php echo esc_attr($opacity); ?>;
-                    border-radius: <?php echo esc_attr($border_radius); ?>;
-                    padding: 20px;
-                    max-width: 100%;
+    <div class="nuvho-preview-card">
+        <h2>Live Preview</h2>
+        <div class="nuvho-booking-preview">
+            <?php 
+            // Calculate border radius based on settings
+            $border_radius = '0';
+            if ($settings['booking_mask_border_radius'] === 'Rounded') {
+                $border_radius = '8px';
+            } elseif ($settings['booking_mask_border_radius'] === 'Pill') {
+                $border_radius = '20px';
+            }
+            
+            // Calculate button border radius
+            $button_radius = '0';
+            if ($settings['button_border_radius'] === 'Rounded') {
+                $button_radius = '8px';
+            } elseif ($settings['button_border_radius'] === 'Pill') {
+                $button_radius = '20px';
+            }
+            
+            // Calculate opacity
+            $opacity = str_replace('%', '', $settings['background_opacity']) / 100;
+
+            // Convert background color to rgba with opacity
+            $bg_color = $settings['background_color'];
+            $rgba_color = $bg_color;
+
+            // If it's a hex color, convert to rgba
+            if (preg_match('/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i', $bg_color, $matches)) {
+                $r = hexdec($matches[1]);
+                $g = hexdec($matches[2]);
+                $b = hexdec($matches[3]);
+                $rgba_color = "rgba($r, $g, $b, $opacity)";
+            } 
+            // Handle other color formats if needed...
+
+            $background_color_with_opacity = $rgba_color;
+            ?>
+            <div id="nuvho-preview-container" style="
+                background-color: <?php echo esc_attr($background_color_with_opacity); ?>;
+                border-radius: <?php echo esc_attr($border_radius); ?>;
+                padding: 20px;
+                max-width: 100%;
+            ">
+                <div style="
+                    color: <?php echo esc_attr($settings['font_color']); ?>;
+                    font-family: <?php echo $settings['font'] === 'Default' ? 'inherit' : esc_attr($settings['font']); ?>;
                 ">
-                    <div style="
-                        color: <?php echo esc_attr($settings['font_color']); ?>;
-                        font-family: <?php echo $settings['font'] === 'Default' ? 'inherit' : esc_attr($settings['font']); ?>;
-                    ">
-                        <div class="nuvho-booking-form-preview">
-                            <div class="nuvho-preview-row">
-                                <label>Check-in / Check-out</label>
-                                <input type="text" placeholder="Select dates" readonly>
-                            </div>
-                            <div class="nuvho-preview-row">
-                                <label>Guests</label>
-                                <select>
-                                    <option>1 Adult</option>
-                                    <option>2 Adults</option>
-                                </select>
-                            </div>
-                            <?php if (isset($settings['show_promo_code']) && $settings['show_promo_code']) : ?>
-                            <div id="nuvho-preview-promo-field" class="nuvho-preview-row">
-                                <label>Promo Code</label>
-                                <input type="text" placeholder="Enter promo code" readonly>
-                            </div>
-                            <?php endif; ?>
-                            <div class="nuvho-preview-row">
-                                <label>&nbsp;</label>
-                                <button style="
-                                    background-color: <?php echo esc_attr($settings['button_color']); ?>;
-                                    color: <?php echo esc_attr($settings['button_text_color']); ?>;
-                                    border-radius: <?php echo esc_attr($button_radius); ?>;
-                                    border: none;
-                                    padding: 8px 16px;
-                                    cursor: pointer;
-                                "><?php echo esc_html($settings['button_text']); ?></button>
-                            </div>
+                    <div class="nuvho-booking-form-preview">
+                        <!-- 1. Check-in / Check-out -->
+                        <div class="nuvho-preview-row">
+                            <label>Check-in / Check-out</label>
+                            <input type="text" placeholder="Select dates" readonly>
+                        </div>
+                        
+                        <!-- 2. Guests -->
+                        <div class="nuvho-preview-row">
+                            <label>Guests</label>
+                            <select>
+                                <option>1 Adult</option>
+                                <option>2 Adults</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 3. Promo Code (always in third position if enabled) -->
+                        <?php if (isset($settings['show_promo_code']) && $settings['show_promo_code']) : ?>
+                        <div id="nuvho-preview-promo-field" class="nuvho-preview-row">
+                            <label>Promo Code</label>
+                            <input type="text" placeholder="Enter promo code" readonly>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <!-- 4. Button (always last) -->
+                        <div class="nuvho-preview-row">
+                            <label>&nbsp;</label>
+                            <button style="
+                                background-color: <?php echo esc_attr($settings['button_color']); ?>;
+                                color: <?php echo esc_attr($settings['button_text_color']); ?>;
+                                border-radius: <?php echo esc_attr($button_radius); ?>;
+                                border: none;
+                                padding: 8px 16px;
+                                cursor: pointer;
+                            "><?php echo esc_html($settings['button_text']); ?></button>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="nuvho-shortcode-info">
-                <h3>Shortcode</h3>
-                <p>Use this shortcode to display the booking mask on any page or post:</p>
-                <code>[nuvho_booking_mask_single]</code>
-            </div>
+        </div>
+        
+        <div class="nuvho-shortcode-info">
+            <h3>Shortcode</h3>
+            <p>Use this shortcode to display the booking mask on any page or post:</p>
+            <code>[nuvho_booking_mask_single]</code>
         </div>
     </div>
+</div>
+
+<?php
+/**
+ * Partial update for the admin settings - enable promo code 
+ * Place this within the Simple Booking specific settings section
+ */
+?>
+
+<div id="simple-booking-specific-settings" class="nuvho-settings-card" style="<?php echo (strpos($settings['option'], 'Simple Booking') !== false) ? 'display: block;' : 'display: none;'; ?>">
+    <h2>Simple Booking Settings</h2>
+    <table class="form-table">
+        <tr>
+            <th scope="row">Show Promo Code Field:</th>
+            <td>
+                <label>
+                    <input type="checkbox" name="nuvho_booking_mask_settings[show_promo_code]" value="1" <?php checked(isset($settings['show_promo_code']) && $settings['show_promo_code']); ?> />
+                    Display a promo code field in the booking form
+                </label>
+                <p class="description">This allows users to enter their own promotional codes. The promo code field will always appear as the third element in the booking form.</p>
+            </td>
+        </tr>
+    </table>
+</div>
     
     <!-- Settings form - PROPERLY STRUCTURED -->
     <form method="post" action="options.php">

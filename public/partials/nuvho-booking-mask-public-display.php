@@ -16,8 +16,38 @@
 // $opacity - Calculated opacity value
 ?>
 
+<?php
+$opacity = str_replace('%', '', $settings['background_opacity']) / 100;
+// Calculate background color with opacity
+$bg_color = $settings['background_color'];
+$background_color_with_opacity = $bg_color; // Default
+
+// If it's a hex color, convert to rgba
+if (preg_match('/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i', $bg_color, $matches)) {
+    $r = hexdec($matches[1]);
+    $g = hexdec($matches[2]);
+    $b = hexdec($matches[3]);
+    $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
+} 
+// If it's already rgba, just update the alpha
+elseif (preg_match('/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d\.]+\)$/i', $bg_color, $matches)) {
+    $r = $matches[1];
+    $g = $matches[2];
+    $b = $matches[3];
+    $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
+}
+// If it's rgb, convert to rgba
+elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) {
+    $r = $matches[1];
+    $g = $matches[2];
+    $b = $matches[3];
+    $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
+}
+
+?>
+
 <div class="nuvho-booking-mask-container" 
-     style="background-color: <?php echo esc_attr($settings['background_color']); ?>; 
+     style="background-color: <?php echo esc_attr($background_color_with_opacity) ?>; 
             opacity: <?php echo esc_attr($opacity); ?>; 
             border-radius: <?php echo esc_attr($border_radius); ?>;">
     
@@ -63,13 +93,13 @@
                 <input type="hidden" name="hid" value="<?php echo esc_attr($settings['hotel_id']); ?>">
                 <input type="hidden" name="lang" value="<?php echo esc_attr(strtoupper(substr(explode(' ', $settings['language'])[0], 0, 2))); ?>">
                 <input type="hidden" name="cur" value="<?php echo esc_attr($settings['currency']); ?>">
-                <?php if (!empty($settings['coupon'])) : ?>
+                <?php if (!empty($settings['coupon']) && empty($settings['show_promo_code'])) : ?>
                     <input type="hidden" name="coupon" value="<?php echo esc_attr($settings['coupon']); ?>">
                 <?php endif; ?>
             <?php elseif ($settings['option'] === 'Simple Booking v2') : ?>
                 <input type="hidden" name="lang" value="<?php echo esc_attr(strtoupper(substr(explode(' ', $settings['language'])[0], 0, 2))); ?>">
                 <input type="hidden" name="cur" value="<?php echo esc_attr($settings['currency']); ?>">
-                <?php if (!empty($settings['coupon'])) : ?>
+                <?php if (!empty($settings['coupon']) && empty($settings['show_promo_code'])) : ?>
                     <input type="hidden" name="coupon" value="<?php echo esc_attr($settings['coupon']); ?>">
                 <?php endif; ?>
             <?php else : ?>
@@ -78,9 +108,9 @@
                 <input type="hidden" name="currency" value="<?php echo esc_attr($settings['currency']); ?>">
             <?php endif; ?>
             
-            <!-- Top row with date picker and guest selector -->
+            <!-- Single row with all elements in consistent order -->
             <div class="nuvho-form-row">
-                <!-- Date picker -->
+                <!-- 1. Date picker -->
                 <div class="nuvho-form-field nuvho-date-range">
                     <label for="nuvho-date-picker"><?php esc_html_e('Check-in / Check-out', 'nuvho-booking-mask'); ?></label>
                     <div class="nuvho-date-inputs">
@@ -90,79 +120,80 @@
                     </div>
                 </div>
                 
-                <!-- Guest selection modal -->
+                <!-- 2. Guest selection modal -->
                 <div class="nuvho-form-field nuvho-guest-selector-container">
                     <label><?php esc_html_e('Persons:', 'nuvho-booking-mask'); ?></label>
                     <!-- Trigger button that shows current selection -->
                     <div class="nuvho-guest-summary">
-                        <button type="button" class="nuvho-guest-trigger">
-                            <span class="nuvho-guest-count">
-                                <strong class="nuvho-adults-count">2</strong> <?php esc_html_e('ADULTS', 'nuvho-booking-mask'); ?> 
-                                + <strong class="nuvho-kids-count">0</strong> <?php esc_html_e('KIDS', 'nuvho-booking-mask'); ?>
-                            </span>
-                            <span class="nuvho-selector-toggle">&#9660;</span>
-                        </button>
+                    <button type="button" class="nuvho-guest-trigger" style="color: #333;">
+                    <span class="nuvho-guest-count" style="color: #333;">
+                        <strong class="nuvho-adults-count">2</strong> 
+                        <span style="color: #333;"><?php esc_html_e('ADULTS', 'nuvho-booking-mask'); ?></span>
+                        + <strong class="nuvho-kids-count">0</strong> 
+                        <span style="color: #333;"><?php esc_html_e('KIDS', 'nuvho-booking-mask'); ?></span>
+                    </span>
+                    <span class="nuvho-selector-toggle">&#9660;</span>
+                </button>
                     </div>
                     
                     <!-- Modal that appears when clicked -->
-                    <div class="nuvho-guest-modal" id="nuvho-guest-modal">
-                        <div class="nuvho-modal-content">
-                            <div class="nuvho-room-title"><?php esc_html_e('Guests', 'nuvho-booking-mask'); ?></div>
-                            
-                            <!-- Adults selection -->
-                            <div class="nuvho-guest-row">
-                                <div class="nuvho-guest-label"><?php esc_html_e('Adults:', 'nuvho-booking-mask'); ?> <span class="nuvho-adults-display">2</span></div>
-                                <div class="nuvho-stepper-controls">
-                                    <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults">
-                                        <span class="nuvho-btn-icon">−</span>
-                                    </button>
-                                    <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults">
-                                        <span class="nuvho-btn-icon">+</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Kids selection -->
-                            <div class="nuvho-guest-row">
-                                <div class="nuvho-guest-label"><?php esc_html_e('Kids:', 'nuvho-booking-mask'); ?> <span class="nuvho-kids-display">0</span></div>
-                                <div class="nuvho-stepper-controls">
-                                    <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids">
-                                        <span class="nuvho-btn-icon">−</span>
-                                    </button>
-                                    <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids">
-                                        <span class="nuvho-btn-icon">+</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Modal buttons -->
-                            <div class="nuvho-modal-buttons">
-                                <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
-                                <button type="button" class="nuvho-done-btn"><?php esc_html_e('Ok, done', 'nuvho-booking-mask'); ?></button>
-                            </div>
-                        </div>
-                    </div>
+<!-- Modal that appears when clicked -->
+<div class="nuvho-guest-modal" id="nuvho-guest-modal">
+    <div class="nuvho-modal-content">
+        <div class="nuvho-room-title"><?php esc_html_e('Guests', 'nuvho-booking-mask'); ?></div>
+        
+        <!-- Adults selection -->
+        <div class="nuvho-guest-row">
+            <div class="nuvho-guest-label">
+                <span class="nuvho-label-suffix"><?php echo esc_html(((int)$adults === 1) ? __('Adult', 'nuvho-booking-mask') : __('Adults', 'nuvho-booking-mask')); ?></span>
+            </div>
+            <div class="nuvho-stepper-controls">
+                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults">
+                    <span class="nuvho-btn-icon">−</span>
+                </button>
+                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults">
+                    <span class="nuvho-btn-icon">+</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Kids selection -->
+        <div class="nuvho-guest-row">
+            <div class="nuvho-guest-label">
+                <span class="nuvho-label-suffix"><?php echo esc_html(((int)$children === 1) ? __('Kid', 'nuvho-booking-mask') : __('Kids', 'nuvho-booking-mask')); ?></span>
+            </div>
+            <div class="nuvho-stepper-controls">
+                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids">
+                    <span class="nuvho-btn-icon">−</span>
+                </button>
+                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids">
+                    <span class="nuvho-btn-icon">+</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Modal buttons -->
+        <div class="nuvho-modal-buttons">
+            <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
+            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Ok, done', 'nuvho-booking-mask'); ?></button>
+        </div>
+    </div>
+</div>
                     
                     <!-- Hidden input fields for form submission -->
                     <input type="hidden" id="nuvho-adults-input" name="adults" value="2">
                     <input type="hidden" id="nuvho-kids-input" name="children" value="0">
                 </div>
-            </div>
-            
-            <!-- Bottom row with promo code and submit button -->
-            <div class="nuvho-form-row nuvho-bottom-row">
-                <!-- Promo code field -->
+                
+                <!-- 3. Promo code field - always in third position if enabled -->
                 <?php if (isset($settings['show_promo_code']) && $settings['show_promo_code'] && (strpos($settings['option'], 'Simple Booking') !== false)) : ?>
                 <div class="nuvho-form-field nuvho-promo-field">
                     <label for="nuvho-promo"><?php esc_html_e('Promo Code', 'nuvho-booking-mask'); ?></label>
                     <input type="text" id="nuvho-promo" name="coupon" placeholder="<?php esc_attr_e('Enter promo code', 'nuvho-booking-mask'); ?>">
                 </div>
-                <div class="nuvho-form-spacer"></div>
-                <?php else: ?>
-                <div class="nuvho-form-spacer"></div>
                 <?php endif; ?>
                 
-                <!-- Submit button - bottom right aligned -->
+                <!-- 4. Submit button - always last -->
                 <div class="nuvho-form-field nuvho-submit-field">
                     <button type="submit" 
                             style="background-color: <?php echo esc_attr($settings['button_color']); ?>; 

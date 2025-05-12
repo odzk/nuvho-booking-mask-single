@@ -168,6 +168,33 @@ class Nuvho_Booking_Mask_Public {
         }
     }
 
+    public static function convert_color_to_rgba($color, $opacity) {
+        // If it's a hex color, convert to rgba
+        if (preg_match('/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i', $color, $matches)) {
+            $r = hexdec($matches[1]);
+            $g = hexdec($matches[2]);
+            $b = hexdec($matches[3]);
+            return "rgba($r, $g, $b, $opacity)";
+        } 
+        // If it's already rgba, just update the alpha
+        elseif (preg_match('/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d\.]+\)$/i', $color, $matches)) {
+            $r = $matches[1];
+            $g = $matches[2];
+            $b = $matches[3];
+            return "rgba($r, $g, $b, $opacity)";
+        }
+        // If it's rgb, convert to rgba
+        elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $color, $matches)) {
+            $r = $matches[1];
+            $g = $matches[2];
+            $b = $matches[3];
+            return "rgba($r, $g, $b, $opacity)";
+        }
+        
+        // Default fallback
+        return !empty($color) ? $color : "rgba(76, 115, 128, $opacity)";
+    }
+
     /**
      * Booking mask shortcode callback
      */
@@ -198,6 +225,35 @@ class Nuvho_Booking_Mask_Public {
         
         // Calculate opacity
         $opacity = str_replace('%', '', $settings['background_opacity']) / 100;
+
+        // Convert background color to rgba with opacity
+        $bg_color = $settings['background_color'];
+        $rgba_color = $bg_color;
+
+        // If it's a hex color, convert to rgba
+        if (preg_match('/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i', $bg_color, $matches)) {
+            $r = hexdec($matches[1]);
+            $g = hexdec($matches[2]);
+            $b = hexdec($matches[3]);
+            $rgba_color = "rgba($r, $g, $b, $opacity)";
+        } 
+        // If it's already rgba, just update the alpha
+        elseif (preg_match('/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d\.]+\)$/i', $bg_color, $matches)) {
+            $r = $matches[1];
+            $g = $matches[2];
+            $b = $matches[3];
+            $rgba_color = "rgba($r, $g, $b, $opacity)";
+        }
+        // If it's rgb, convert to rgba
+        elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) {
+            $r = $matches[1];
+            $g = $matches[2];
+            $b = $matches[3];
+            $rgba_color = "rgba($r, $g, $b, $opacity)";
+        }
+
+        $background_color_with_opacity = $rgba_color;
+
         
         // For Simple Booking v2, we need to append the hotel_id to the URL
         if ($settings['option'] === 'Simple Booking v2') {

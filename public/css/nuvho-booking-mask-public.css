@@ -255,6 +255,17 @@
 .nuvho-guest-count {
     font-size: 16px;
     text-transform: uppercase;
+    color: #333; /* Dark text color for better visibility */
+}
+
+.nuvho-guest-trigger {
+    color: #333; /* Dark text color */
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* For better contrast, make sure the text doesn't inherit transparency */
+.nuvho-guest-trigger * {
+    opacity: 1;
 }
 
 .nuvho-guest-count strong {
@@ -307,6 +318,7 @@
 .nuvho-guest-label {
     font-size: 20px;
     font-weight: 500;
+    color: #333;
 }
 
 /* Stepper buttons */
