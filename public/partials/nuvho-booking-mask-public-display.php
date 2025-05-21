@@ -175,7 +175,7 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
         <!-- Modal buttons -->
         <div class="nuvho-modal-buttons">
             <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
-            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Ok, done', 'nuvho-booking-mask'); ?></button>
+            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
         </div>
     </div>
 </div>
