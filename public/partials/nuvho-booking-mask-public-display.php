@@ -43,10 +43,13 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
     $b = $matches[3];
     $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
 }
+// Determine layout style (compact or expanded)
+$layout_style = isset($settings['layout_style']) ? $settings['layout_style'] : 'compact';
+$layout_class = ($layout_style === 'expanded') ? 'nuvho-layout-expanded' : 'nuvho-layout-compact';
 
 ?>
 
-<div class="nuvho-booking-mask-container" 
+<div class="nuvho-booking-mask-container <?php echo esc_attr($layout_class); ?>" 
      style="background-color: <?php echo esc_attr($background_color_with_opacity) ?>; 
             opacity: <?php echo esc_attr($opacity); ?>; 
             border-radius: <?php echo esc_attr($border_radius); ?>;">
@@ -175,7 +178,7 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
         <!-- Modal buttons -->
         <div class="nuvho-modal-buttons">
             <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
-            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Ok, done', 'nuvho-booking-mask'); ?></button>
+            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
         </div>
     </div>
 </div>

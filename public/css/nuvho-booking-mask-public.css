@@ -2,6 +2,44 @@
  * Public styles for Nuvho Booking Mask with reduced form element heights
  */
 
+ /* Layout styles - Compact (default) vs. Expanded */
+.nuvho-layout-compact .nuvho-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+    align-items: flex-end;
+}
+
+.nuvho-layout-compact .nuvho-form-field {
+    flex: 1;
+    min-width: 150px;
+    padding: 0 10px;
+    margin-bottom: 15px;
+}
+
+/* Expanded layout - stacked form fields */
+.nuvho-layout-expanded .nuvho-form-row {
+    display: block;
+    margin: 0;
+}
+
+.nuvho-layout-expanded .nuvho-form-field {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.nuvho-layout-expanded .nuvho-submit-field {
+    width: 100%;
+}
+
+.nuvho-layout-expanded .nuvho-submit-field button[type="submit"] {
+    width: 100%;
+    height: 45px; /* Slightly taller button for expanded layout */
+    font-size: 16px;
+}
+
 /* Container styling */
 .nuvho-booking-mask-container {
     padding: 20px;

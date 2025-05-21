@@ -362,6 +362,16 @@ $opacity_options = array(
                     <h2>Appearance Settings</h2>
                     <table class="form-table">
                         <tr>
+                            <th scope="row">Layout Style:</th>
+                            <td>
+                                <select name="nuvho_booking_mask_settings[layout_style]">
+                                    <option value="compact" <?php selected(isset($settings['layout_style']) ? $settings['layout_style'] : 'compact', 'compact'); ?>>Compact (Horizontal)</option>
+                                    <option value="expanded" <?php selected(isset($settings['layout_style']) ? $settings['layout_style'] : 'compact', 'expanded'); ?>>Expanded (Stacked)</option>
+                                </select>
+                                <p class="description">Choose between a compact horizontal layout or an expanded stacked layout for the booking form.</p>
+                            </td>
+                        </tr>
+                        <tr>
                             <th scope="row">Background Color:</th>
                             <td>
                                 <input type="text" name="nuvho_booking_mask_settings[background_color]" value="<?php echo esc_attr($settings['background_color']); ?>" class="nuvho-color-picker" />

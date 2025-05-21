@@ -45,6 +45,21 @@
 
         // Function to update preview
         function updatePreview() {
+
+            // Add to the updatePreview function in admin/js/nuvho-booking-mask-admin.js
+            const layoutStyle = $('select[name="nuvho_booking_mask_settings[layout_style]"]').val();
+            $('#nuvho-preview-container').removeClass('nuvho-layout-compact nuvho-layout-expanded')
+                .addClass('nuvho-layout-' + (layoutStyle || 'compact'));
+
+            // Update the booking form preview layout
+            if (layoutStyle === 'expanded') {
+                $('.nuvho-booking-form-preview').css('flex-direction', 'column');
+                $('.nuvho-preview-row').css('width', '100%');
+            } else {
+                $('.nuvho-booking-form-preview').css('flex-direction', 'row');
+                $('.nuvho-preview-row').css('width', 'auto');
+            }
+
             // Get current values
             const backgroundColorField = $('input[name="nuvho_booking_mask_settings[background_color]"]');
             const backgroundColor = backgroundColorField.wpColorPicker('color') || backgroundColorField.val();
