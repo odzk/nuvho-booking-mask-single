@@ -1,5 +1,5 @@
 /**
- * Public styles for Nuvho Booking Mask
+ * Public styles for Nuvho Booking Mask with reduced form element heights
  */
 
 /* Container styling */
@@ -47,22 +47,29 @@
     font-weight: 500;
 }
 
+/* REDUCED HEIGHT FOR ALL FORM ELEMENTS */
 .nuvho-booking-form input[type="text"],
 .nuvho-booking-form input[type="date"],
-.nuvho-booking-form select {
+.nuvho-booking-form select,
+.nuvho-date-picker,
+.nuvho-promo-field input {
+    height: 40px; /* Reduced height closer to text size */
     width: 100%;
-    padding: 20px;
+    padding: 0 15px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
     background-color: rgba(255, 255, 255, 0.9);
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
 }
 
 .nuvho-booking-form button {
-    padding: 12px 20px;
+    padding: 8px 16px;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
 }
@@ -85,7 +92,7 @@
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
     background-repeat: no-repeat;
     background-position: calc(100% - 10px) center;
-    background-size: 16px;
+    background-size: 14px;
     padding-right: 30px;
 }
 
@@ -156,13 +163,16 @@
 }
 
 .nuvho-submit-field button[type="submit"] {
-    padding: 20px 40px;
-    font-size: 16px;
+    padding: 0 25px;
+    font-size: 14px;
     font-weight: 500;
     width: auto;
     margin-top: 0;
-    height: 63px; /* Match height of other inputs */
+    height: 40px; /* Reduced height closer to text size */
     box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Original stepper controls - keeping for backward compatibility */
@@ -174,16 +184,18 @@
     border-radius: 4px;
     background-color: rgba(255, 255, 255, 0.9);
     overflow: hidden;
+    height: 40px; /* Match the new height */
 }
 
 .nuvho-stepper input[type="number"] {
     flex: 1;
     width: 100%;
     border: none;
-    padding: 10px 5px;
+    padding: 8px 5px;
     text-align: center;
     -moz-appearance: textfield; /* Remove number spinner in Firefox */
     background-color: transparent;
+    font-size: 14px;
 }
 
 .nuvho-stepper input::-webkit-outer-spin-button,
@@ -193,14 +205,14 @@
 }
 
 .nuvho-stepper-btn {
-    width: 35px;
-    height: 35px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.05);
     border: none;
-    font-size: 18px;
+    font-size: 14px;
     cursor: pointer;
     font-weight: bold;
     padding: 0;
@@ -221,12 +233,16 @@
 }
 
 .nuvho-promo-field input {
+    height: 40px; /* Reduced height closer to text size */
     width: 100%;
-    padding: 20px;
+    padding: 0 15px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
     background-color: rgba(255, 255, 255, 0.9);
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
 }
 
 /* NEW: Guest Selector Styles */
@@ -241,19 +257,19 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 0 15px;
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
     cursor: pointer;
     text-align: left;
-    font-size: 16px;
-    height: 63px; /* Match the height of other inputs */
+    font-size: 14px;
+    height: 40px; /* Reduced height closer to text size */
     box-sizing: border-box;
 }
 
 .nuvho-guest-count {
-    font-size: 16px;
+    font-size: 14px;
     text-transform: uppercase;
     color: #333; /* Dark text color for better visibility */
 }
@@ -271,12 +287,12 @@
 .nuvho-guest-count strong {
     font-weight: 700;
     line-height: 1;
-    margin-right: 5px;
+    margin-right: 3px;
 }
 
 .nuvho-selector-toggle {
     color: #4c7380;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 /* Modal styling */
@@ -296,14 +312,14 @@
 }
 
 .nuvho-modal-content {
-    padding: 20px;
+    padding: 15px;
 }
 
 .nuvho-room-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
     border-bottom: 1px solid #eee;
     color: #333;
 }
@@ -312,11 +328,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .nuvho-guest-label {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 500;
     color: #333;
 }
@@ -324,19 +340,19 @@
 /* Stepper buttons */
 .nuvho-stepper-controls {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .nuvho-circle-btn {
-    width: 48px;
-    height: 48px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 24px;
+    font-size: 16px;
     transition: background-color 0.2s;
 }
 
@@ -356,7 +372,7 @@
 
 .nuvho-btn-icon {
     font-weight: bold;
-    font-size: 24px;
+    font-size: 16px;
     line-height: 0;
 }
 
@@ -370,26 +386,26 @@
 .nuvho-modal-buttons {
     display: flex;
     justify-content: space-between;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 .nuvho-cancel-btn {
-    padding: 12px 20px;
+    padding: 8px 15px;
     background: transparent;
     border: none;
     color: #333;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     width: auto;
 }
 
 .nuvho-done-btn {
-    padding: 12px 30px;
+    padding: 8px 20px;
     background: #4c7380;
     border: none;
     border-radius: 4px;
     color: white;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     width: auto;
 }
@@ -440,17 +456,25 @@
         clear: both;
     }
     
-    .nuvho-guest-trigger {
-        padding: 15px;
+    /* All form elements maintain the same 40px height on mobile */
+    .nuvho-booking-form input[type="text"],
+    .nuvho-booking-form input[type="date"],
+    .nuvho-booking-form select,
+    .nuvho-date-picker,
+    .nuvho-guest-trigger,
+    .nuvho-promo-field input,
+    .nuvho-submit-field button[type="submit"] {
+        height: 40px; /* Keep consistent height on mobile */
+        padding: 0 12px; /* Slightly smaller padding on mobile */
     }
     
     .nuvho-circle-btn {
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
     }
     
     .nuvho-modal-content {
-        padding: 15px;
+        padding: 12px;
     }
 }
 
