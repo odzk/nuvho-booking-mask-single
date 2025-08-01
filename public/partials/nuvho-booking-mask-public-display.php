@@ -48,7 +48,7 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
 
 <div class="nuvho-booking-mask-container" 
      style="background-color: <?php echo esc_attr($background_color_with_opacity) ?>; 
-            opacity: <?php echo esc_attr($opacity); ?>; 
+            opacity: 1; 
             border-radius: <?php echo esc_attr($border_radius); ?>;">
     
     <div class="nuvho-booking-form" 
