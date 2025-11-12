@@ -79,6 +79,10 @@ class Nuvho_Booking_Mask_Public {
         // Add the Cloudbeds URL override
         wp_enqueue_script($this->plugin_name . '-cloudbeds-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-cloudbeds-override.js', array('jquery', $this->plugin_name), $this->version, false);
         
+
+        // Add booking engine specific handlers
+        wp_enqueue_script($this->plugin_name . '-site-minder', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/site_minder.js', array('jquery', $this->plugin_name), $this->version, false);
+        
         // Localize script with settings data
         $settings = get_option('nuvho_booking_mask_settings');
         
@@ -273,6 +277,12 @@ class Nuvho_Booking_Mask_Public {
             $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
         }
         
+        // For SiteMinder, append the hotel_id to the URL
+        if ($settings['option'] === 'SiteMinder') {
+            $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
+        }
+        
+
         // Start output buffering
         ob_start();
         

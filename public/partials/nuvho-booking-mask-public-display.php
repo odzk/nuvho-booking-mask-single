@@ -17,6 +17,11 @@
 ?>
 
 <?php
+
+// Set default values for guest counts
+$adults = 2;
+$children = 0;
+
 $opacity = str_replace('%', '', $settings['background_opacity']) / 100;
 // Calculate background color with opacity
 $bg_color = $settings['background_color'];
@@ -48,7 +53,7 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
 
 <div class="nuvho-booking-mask-container" 
      style="background-color: <?php echo esc_attr($background_color_with_opacity) ?>; 
-            opacity: 1; 
+            opacity: <?php echo esc_attr($opacity); ?>; 
             border-radius: <?php echo esc_attr($border_radius); ?>;">
     
     <div class="nuvho-booking-form" 
@@ -145,6 +150,7 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
         <!-- Adults selection -->
         <div class="nuvho-guest-row">
             <div class="nuvho-guest-label">
+                <span class="nuvho-adults-number">2</span>
                 <span class="nuvho-label-suffix"><?php echo esc_html(((int)$adults === 1) ? __('Adult', 'nuvho-booking-mask') : __('Adults', 'nuvho-booking-mask')); ?></span>
             </div>
             <div class="nuvho-stepper-controls">
@@ -160,6 +166,7 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
         <!-- Kids selection -->
         <div class="nuvho-guest-row">
             <div class="nuvho-guest-label">
+                <span class="nuvho-kids-number">0</span>
                 <span class="nuvho-label-suffix"><?php echo esc_html(((int)$children === 1) ? __('Kid', 'nuvho-booking-mask') : __('Kids', 'nuvho-booking-mask')); ?></span>
             </div>
             <div class="nuvho-stepper-controls">
@@ -207,6 +214,62 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
 </div>
 
 <script>
+    // Update guest number displays in modal
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get modal elements
+        const modal = document.getElementById('nuvho-guest-modal');
+        const adultsInput = document.getElementById('nuvho-adults-input');
+        const kidsInput = document.getElementById('nuvho-kids-input');
+        const adultsDisplay = document.querySelector('.nuvho-adults-number');
+        const kidsDisplay = document.querySelector('.nuvho-kids-number');
+        
+        // Handle increase/decrease buttons
+        const increaseButtons = document.querySelectorAll('.nuvho-increase');
+        const decreaseButtons = document.querySelectorAll('.nuvho-decrease');
+        
+        increaseButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                if (target === 'adults') {
+                    let currentValue = parseInt(adultsInput.value) || 1;
+                    if (currentValue < 10) { // Set a reasonable max
+                        currentValue++;
+                        adultsInput.value = currentValue;
+                        adultsDisplay.textContent = currentValue;
+                    }
+                } else if (target === 'kids') {
+                    let currentValue = parseInt(kidsInput.value) || 0;
+                    if (currentValue < 10) { // Set a reasonable max
+                        currentValue++;
+                        kidsInput.value = currentValue;
+                        kidsDisplay.textContent = currentValue;
+                    }
+                }
+            });
+        });
+        
+        decreaseButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                if (target === 'adults') {
+                    let currentValue = parseInt(adultsInput.value) || 1;
+                    if (currentValue > 1) { // Minimum 1 adult
+                        currentValue--;
+                        adultsInput.value = currentValue;
+                        adultsDisplay.textContent = currentValue;
+                    }
+                } else if (target === 'kids') {
+                    let currentValue = parseInt(kidsInput.value) || 0;
+                    if (currentValue > 0) { // Minimum 0 kids
+                        currentValue--;
+                        kidsInput.value = currentValue;
+                        kidsDisplay.textContent = currentValue;
+                    }
+                }
+            });
+        });
+    });
+    
     // Set minimum dates
     document.addEventListener('DOMContentLoaded', function() {
         const today = new Date();
