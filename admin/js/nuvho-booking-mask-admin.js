@@ -92,7 +92,13 @@
                 'border-radius': maskRadiusValue
             });
             
-            $('#nuvho-preview-container div').css({
+            $('#nuvho-preview-container div, #nuvho-preview-container label').css({
+                'color': fontColor,
+                'font-family': fontFamily
+            });
+            
+            // Update guest counter button styling to match font color
+            $('.nuvho-preview-guest-button').css({
                 'color': fontColor,
                 'font-family': fontFamily
             });
@@ -106,12 +112,10 @@
             // Show/hide promo code field in preview
             if (showPromoCode) {
                 if ($('#nuvho-preview-promo-field').length === 0) {
-                    // Create the promo code field if it doesn't exist
                     const promoField = $('<div id="nuvho-preview-promo-field" class="nuvho-preview-row"><label>Promo Code</label><input type="text" placeholder="Enter promo code" readonly></div>');
-                    $('#nuvho-preview-container .nuvho-booking-form-preview').prepend(promoField);
+                    $('#nuvho-preview-container .nuvho-booking-form-preview .nuvho-preview-row').eq(1).after(promoField);
                 }
             } else {
-                // Remove the promo code field if it exists
                 $('#nuvho-preview-promo-field').remove();
             }
         }
@@ -121,7 +125,15 @@
             const selectedEngine = $(this).val();
             const urlField = $('input[name="nuvho_booking_mask_settings[url]"]');
             const currentUrl = urlField.val();
+            const hotelIdLabel = $('#hotel-id-label');
             let defaultUrl = '';
+            
+            // Update label based on booking engine
+            if (selectedEngine === 'SiteMinder') {
+                hotelIdLabel.text('Property:');
+            } else {
+                hotelIdLabel.text('Hotel ID:');
+            }
             
             // Toggle specific settings sections
             if (selectedEngine === 'Accor') {
@@ -176,6 +188,9 @@
                 urlField.val(defaultUrl);
             }
         });
+        
+        // Trigger change on page load to set correct label
+        $('#nuvho-booking-option').trigger('change');
     });
 
 })(jQuery);

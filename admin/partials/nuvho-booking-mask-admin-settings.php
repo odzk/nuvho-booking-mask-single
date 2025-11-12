@@ -148,11 +148,11 @@ $opacity_options = array(
                         
                         <!-- 2. Guests -->
                         <div class="nuvho-preview-row">
-                            <label>Guests</label>
-                            <select>
-                                <option>1 Adult</option>
-                                <option>2 Adults</option>
-                            </select>
+                            <label>Persons:</label>
+                            <div class="nuvho-preview-guest-button">
+                                <span><strong>2</strong> ADULTS + <strong>0</strong> KIDS</span>
+                                <span class="nuvho-preview-arrow">▼</span>
+                            </div>
                         </div>
                         
                         <!-- 3. Promo Code (always in third position if enabled) -->
@@ -261,7 +261,7 @@ $opacity_options = array(
                         </tr>
                         
                         <tr>
-                            <th scope="row">Hotel ID:</th>
+                            <th scope="row"><span id="hotel-id-label">Hotel ID:</span></th>
                             <td>
                                 <input type="text" name="nuvho_booking_mask_settings[hotel_id]" value="<?php echo esc_attr($settings['hotel_id']); ?>" class="regular-text" />
                             </td>

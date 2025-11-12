@@ -17,7 +17,6 @@
 ?>
 
 <?php
-
 // Set default values for guest counts
 $adults = 2;
 $children = 0;

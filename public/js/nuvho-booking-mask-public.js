@@ -94,9 +94,9 @@
         const cancelBtn = $('.nuvho-cancel-btn');
         const doneBtn = $('.nuvho-done-btn');
         
-        // Counters and displays
-        const adultCountDisplay = $('.nuvho-adults-display');
-        const kidsCountDisplay = $('.nuvho-kids-display');
+        // Counters and displays - FIXED CLASS NAMES
+        const adultCountDisplay = $('.nuvho-adults-number');
+        const kidsCountDisplay = $('.nuvho-kids-number');
         const adultCountSummary = $('.nuvho-adults-count');
         const kidsCountSummary = $('.nuvho-kids-count');
         
@@ -238,43 +238,20 @@
         // END OF GUEST SELECTOR FUNCTIONALITY
         
         // Track booking form submissions
-
-        $(document).on('submit', '#nuvho-booking-form', function(e) {
-            // Prevent form submission
-            e.preventDefault();
+        $(document).on('submit', '#nuvho-booking-form', function() {
+            // Track the click
+            trackBookingClick();
             
-            const form = $(this);
-            
-            // Check if dates are selected
-            const checkin = form.find('#nuvho-checkin').val();
-            const checkout = form.find('#nuvho-checkout').val();
+            // Only allow the form submission if dates are selected
+            const checkin = $(this).find('#nuvho-checkin').val();
+            const checkout = $(this).find('#nuvho-checkout').val();
             
             if (!checkin || !checkout) {
                 alert('Please select both check-in and check-out dates.');
                 return false;
             }
             
-            // Build the complete redirect URL
-            const formAction = form.attr('action');
-            const formData = form.serialize();
-            const fullUrl = formAction + (formAction.indexOf('?') > -1 ? '&' : '?') + formData;
-            
-            // Log to console
-            console.log('======================');
-            console.log('BOOKING FORM URL:');
-            console.log(fullUrl);
-            console.log('======================');
-            
-            // Copy to clipboard
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(fullUrl);
-            }
-            
-            // Show URL in alert
-            // alert('Redirect URL:\n\n' + fullUrl + '\n\nURL has been copied to clipboard and logged to console.');
-            
-            // DO NOT REDIRECT - stop here
-            return false;
+            return true;
         });
     });
 
