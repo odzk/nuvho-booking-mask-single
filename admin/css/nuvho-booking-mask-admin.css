@@ -1,16 +1,11 @@
-.nuvho-shortcode-info code {
-    display: inline-block;
-    padding: 8px 12px;
-    background: #f0f0f1;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin: 8px 0;
-    font-family: Consolas, Monaco, monospace;
-}/**
+/**
  * Admin styles for Nuvho Booking Mask
+ * 
+ * IMPORTANT: These styles are SCOPED to avoid interfering with the live preview.
+ * The live preview uses public CSS only.
  */
 
-/* Admin layout */
+/* === ADMIN LAYOUT === */
 .nuvho-admin-columns {
     display: flex;
     flex-wrap: wrap;
@@ -34,7 +29,7 @@
     margin-top: 20px;
 }
 
-/* Cards styling */
+/* === SETTINGS CARDS === */
 .nuvho-settings-card,
 .nuvho-preview-card {
     background: #fff;
@@ -50,68 +45,10 @@
     margin-top: 0;
     padding-bottom: 12px;
     border-bottom: 1px solid #eee;
+    font-size: 18px;
 }
 
-/* Preview section */
-.nuvho-booking-preview {
-    margin-bottom: 20px;
-    padding: 20px;
-    background: #f0f0f1;
-    border-radius: 4px;
-}
-
-.nuvho-preview-row {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-}
-
-.nuvho-booking-form-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 25px;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.nuvho-booking-form-preview .nuvho-preview-row {
-    flex: 1;
-    min-width: 200px;
-}
-
-.nuvho-preview-row label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-}
-
-.nuvho-preview-row input,
-.nuvho-preview-row select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.nuvho-preview-row button {
-    width: 100%;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.nuvho-shortcode-info {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 4px;
-    border-left: 4px solid #2271b1;
-    margin-top: 20px;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
+/* === PREVIEW CARD (LIVE PREVIEW) === */
 .nuvho-preview-card {
     background: #fff;
     border: 1px solid #ccd0d4;
@@ -129,47 +66,64 @@
     font-size: 18px;
 }
 
-/* Preview stepper styles */
-.nuvho-preview-row .nuvho-stepper {
-    display: flex;
-    align-items: center;
+/* === LIVE PREVIEW CONTAINER (DO NOT STYLE HERE) === */
+/* 
+   The live preview uses public CSS only.
+   Any style here would break alignment.
+   We isolate it with high specificity in enqueue.
+*/
+#nuvho-admin-preview {
+    /* No layout styles here — public CSS takes over */
+}
+
+/* === ADMIN FORM STYLES (SCOPED TO .nuvho-settings-card ONLY) === */
+.nuvho-settings-card .form-table th {
+    width: 200px;
+    padding: 10px 0;
+    vertical-align: top;
+}
+
+.nuvho-settings-card .form-table td {
+    padding: 10px 0;
+}
+
+.nuvho-settings-card .form-table input[type="text"],
+.nuvho-settings-card .form-table input[type="url"],
+.nuvho-settings-card .form-table input[type="number"],
+.nuvho-settings-card .form-table select,
+.nuvho-settings-card .form-table textarea {
     width: 100%;
+    max-width: 400px;
+}
+
+.nuvho-settings-card .form-table .regular-text {
+    width: 100%;
+}
+
+/* === SHORTCODE INFO BOX === */
+.nuvho-shortcode-info {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    border-left: 4px solid #2271b1;
+    margin-top: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.nuvho-shortcode-info code {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #f0f0f1;
     border: 1px solid #ddd;
     border-radius: 4px;
-    overflow: hidden;
-}
-
-.nuvho-preview-row .nuvho-stepper input[type="number"] {
-    flex: 1;
-    width: 100%;
-    border: none;
-    padding: 8px 5px;
-    text-align: center;
-    -moz-appearance: textfield;
-    background-color: transparent;
-}
-
-.nuvho-preview-row .nuvho-stepper input::-webkit-outer-spin-button,
-.nuvho-preview-row .nuvho-stepper input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.nuvho-preview-row .nuvho-stepper-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.05);
-    border: none;
+    margin: 8px 0;
+    font-family: Consolas, Monaco, monospace;
     font-size: 14px;
-    cursor: pointer;
-    font-weight: bold;
-    padding: 0;
 }
 
-/* Reports page styling */
+/* === REPORTS PAGE STYLING === */
 .nuvho-reports-header {
     display: flex;
     justify-content: space-between;
@@ -246,7 +200,7 @@
     border-bottom: 1px solid #eee;
 }
 
-/* Responsive adjustments */
+/* === RESPONSIVE === */
 @media screen and (max-width: 782px) {
     .nuvho-admin-column {
         flex: 100%;

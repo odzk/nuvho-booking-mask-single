@@ -80,6 +80,32 @@ class Nuvho_Booking_Mask_Admin {
         wp_enqueue_script('wp-color-picker');
         wp_enqueue_script($this->plugin_name, NUVHO_BOOKING_MASK_PLUGIN_URL . 'admin/js/nuvho-booking-mask-admin.js', array('jquery', 'wp-color-picker'), $this->version, false);
 
+        // Load the exact same assets the public mask uses
+        wp_enqueue_style('daterangepicker', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css', [], '3.1.0');
+        wp_enqueue_script('moment', 'https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js', [], '2.29.4', false);
+        wp_enqueue_script('daterangepicker', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js', ['jquery', 'moment'], '3.1.0', false);
+
+        // Load public CSS for accurate live preview
+        wp_enqueue_style(
+            $this->plugin_name . '-public-preview',
+            NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/css/nuvho-booking-mask-public.css',
+            array(),
+            $this->version
+        );
+        // Force public styles to win in preview
+        $inline_css = '
+            #nuvho-admin-preview * { all: revert !important; }
+            #nuvho-admin-preview .nuvho-form-row,
+            #nuvho-admin-preview .nuvho-form-field,
+            #nuvho-admin-preview .nuvho-date-range,
+            #nuvho-admin-preview .nuvho-submit-field,
+            #nuvho-admin-preview .nuvho-guest-selector-container,
+            #nuvho-admin-preview .nuvho-promo-field {
+                /* Let public CSS handle layout */
+            }
+        ';
+        wp_add_inline_style('nuvho-booking-mask-public-preview', $inline_css);
+
         // Add Chart.js for reports page
         if (strpos($hook, 'nuvho-booking-mask-reports') !== false) {
             wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '3.7.0', true);
