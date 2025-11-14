@@ -119,7 +119,7 @@ class Nuvho_Booking_Mask_Admin {
     public function add_plugin_admin_menu() {
         add_menu_page(
             'Nuvho Booking Mask',
-            'Nuvho Booking Mask (Single)',
+            'Nuvho Booking Mask',
             'manage_options',
             'nuvho-booking-mask',
             array($this, 'display_settings_page'),
