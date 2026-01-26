@@ -14,6 +14,82 @@
 // Get saved settings
 $settings = get_option('nuvho_booking_mask_settings');
 
+// Theme presets
+$theme_presets = array(
+    'default' => array(
+        'name' => 'Default Theme',
+        'background_color' => '#ffffff',
+        'background_opacity' => '100%',
+        'button_color' => '#0073aa',
+        'button_text_color' => '#ffffff',
+        'font_color' => '#333333',
+        'button_text' => 'Check Availability',
+        'button_border_radius' => 'Rounded',
+        'booking_mask_border_radius' => 'Rounded',
+        'font' => 'Default'
+    ),
+    'ocean_breeze' => array(
+        'name' => 'Ocean Breeze',
+        'background_color' => '#f8fafb',
+        'background_opacity' => '100%',
+        'button_color' => '#5a9fd4',
+        'button_text_color' => '#ffffff',
+        'font_color' => '#2d3748',
+        'button_text' => 'Check Availability',
+        'button_border_radius' => 'Rounded',
+        'booking_mask_border_radius' => 'Rounded',
+        'font' => 'Arial'
+    ),
+    'sunset_coral' => array(
+        'name' => 'Sunset Coral',
+        'background_color' => '#fff8f6',
+        'background_opacity' => '100%',
+        'button_color' => '#ff6b47',
+        'button_text_color' => '#ffffff',
+        'font_color' => '#2d1810',
+        'button_text' => 'Book Now',
+        'button_border_radius' => 'Rounded',
+        'booking_mask_border_radius' => 'Rounded',
+        'font' => 'Helvetica'
+    ),
+    'forest_green' => array(
+        'name' => 'Forest Green',
+        'background_color' => '#f0fdf4',
+        'background_opacity' => '100%',
+        'button_color' => '#10b981',
+        'button_text_color' => '#ffffff',
+        'font_color' => '#1f2937',
+        'button_text' => 'Reserve Room',
+        'button_border_radius' => 'Rounded',
+        'booking_mask_border_radius' => 'Rounded',
+        'font' => 'Verdana'
+    ),
+    'royal_purple' => array(
+        'name' => 'Royal Purple',
+        'background_color' => '#faf5ff',
+        'background_opacity' => '100%',
+        'button_color' => '#8b5cf6',
+        'button_text_color' => '#ffffff',
+        'font_color' => '#2d1b69',
+        'button_text' => 'Book Stay',
+        'button_border_radius' => 'Rounded',
+        'booking_mask_border_radius' => 'Rounded',
+        'font' => 'Georgia'
+    ),
+    'midnight_dark' => array(
+        'name' => 'Midnight Dark',
+        'background_color' => '#1f2937',
+        'background_opacity' => '100%',
+        'button_color' => '#60a5fa',
+        'button_text_color' => '#ffffff',
+        'font_color' => '#f9fafb',
+        'button_text' => 'Check Rates',
+        'button_border_radius' => 'Rounded',
+        'booking_mask_border_radius' => 'Rounded',
+        'font' => 'Arial'
+    )
+);
+
 // Booking providers
 $booking_providers = array(
     'Simple Booking v1',
@@ -201,40 +277,10 @@ $opacity_options = array(
                     </form>
                 </div>
             </div>
-        </div>
-
-        <div class="nuvho-shortcode-info">
-            <h3>Shortcode</h3>
-            <p>Use this shortcode to display the booking mask on any page or post:</p>
-            <code>[nuvho_booking_mask_single]</code>
-        </div>
     </div>
 </div>
 
-<?php
-/**
- * Partial update for the admin settings - enable promo code 
- * Place this within the Simple Booking specific settings section
- */
-?>
-
-<div id="simple-booking-specific-settings" class="nuvho-settings-card" style="<?php echo (strpos($settings['option'], 'Simple Booking') !== false) ? 'display: block;' : 'display: none;'; ?>">
-    <h2>Simple Booking Settings</h2>
-    <table class="form-table">
-        <tr>
-            <th scope="row">Show Promo Code Field:</th>
-            <td>
-                <label>
-                    <input type="checkbox" name="nuvho_booking_mask_settings[show_promo_code]" value="1" <?php checked(isset($settings['show_promo_code']) && $settings['show_promo_code']); ?> />
-                    Display a promo code field in the booking form
-                </label>
-                <p class="description">This allows users to enter their own promotional codes. The promo code field will always appear as the third element in the booking form.</p>
-            </td>
-        </tr>
-    </table>
-</div>
-    
-    <!-- Settings form - PROPERLY STRUCTURED -->
+<!-- Settings form - PROPERLY STRUCTURED -->
     <form method="post" action="options.php">
         <?php settings_fields('nuvho_booking_mask_settings_group'); ?>
         
@@ -300,7 +346,7 @@ $opacity_options = array(
                             <th scope="row">Show Promo Code Field:</th>
                             <td>
                                 <label>
-                                    <input type="checkbox" name="nuvho_booking_mask_settings[show_promo_code]" value="1" <?php checked(isset($settings['show_promo_code']) && $settings['show_promo_code']); ?> />
+                                    <input type="checkbox" name="nuvho_booking_mask_settings[show_promo_code]" value="1" id="nuvho-show-promo-code" <?php checked(isset($settings['show_promo_code']) && $settings['show_promo_code']); ?> />
                                     Display a promo code field in the booking form
                                 </label>
                                 <p class="description">This allows users to enter their own promotional codes.</p>
@@ -385,16 +431,29 @@ $opacity_options = array(
                     <h2>Appearance Settings</h2>
                     <table class="form-table">
                         <tr>
+                            <th scope="row">Theme Preset:</th>
+                            <td>
+                                <select name="nuvho_booking_mask_settings[theme_preset]" id="nuvho-theme-selector">
+                                    <option value="">Select a theme preset...</option>
+                                    <?php foreach ($theme_presets as $theme_key => $theme_data) : ?>
+                                        <option value="<?php echo esc_attr($theme_key); ?>" <?php selected(isset($settings['theme_preset']) ? $settings['theme_preset'] : '', $theme_key); ?>><?php echo esc_html($theme_data['name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p class="description">Select a preset theme to automatically configure appearance settings, or customize manually below.</p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
                             <th scope="row">Background Color:</th>
                             <td>
-                                <input type="text" name="nuvho_booking_mask_settings[background_color]" value="<?php echo esc_attr($settings['background_color']); ?>" class="nuvho-color-picker" />
+                                <input type="text" name="nuvho_booking_mask_settings[background_color]" value="<?php echo esc_attr($settings['background_color']); ?>" class="nuvho-color-picker" id="nuvho-bg-color" />
                             </td>
                         </tr>
                         
                         <tr>
                             <th scope="row">Background Opacity:</th>
                             <td>
-                                <select name="nuvho_booking_mask_settings[background_opacity]">
+                                <select name="nuvho_booking_mask_settings[background_opacity]" id="nuvho-bg-opacity">
                                     <?php foreach ($opacity_options as $opacity) : ?>
                                         <option value="<?php echo esc_attr($opacity); ?>" <?php selected($settings['background_opacity'], $opacity); ?>><?php echo esc_html($opacity); ?></option>
                                     <?php endforeach; ?>
@@ -405,35 +464,35 @@ $opacity_options = array(
                         <tr>
                             <th scope="row">Button Color:</th>
                             <td>
-                                <input type="text" name="nuvho_booking_mask_settings[button_color]" value="<?php echo esc_attr($settings['button_color']); ?>" class="nuvho-color-picker" />
+                                <input type="text" name="nuvho_booking_mask_settings[button_color]" value="<?php echo esc_attr($settings['button_color']); ?>" class="nuvho-color-picker" id="nuvho-button-color" />
                             </td>
                         </tr>
                         
                         <tr>
                             <th scope="row">Font Color:</th>
                             <td>
-                                <input type="text" name="nuvho_booking_mask_settings[font_color]" value="<?php echo esc_attr($settings['font_color']); ?>" class="nuvho-color-picker" />
+                                <input type="text" name="nuvho_booking_mask_settings[font_color]" value="<?php echo esc_attr($settings['font_color']); ?>" class="nuvho-color-picker" id="nuvho-font-color" />
                             </td>
                         </tr>
                         
                         <tr>
                             <th scope="row">Button Text:</th>
                             <td>
-                                <input type="text" name="nuvho_booking_mask_settings[button_text]" value="<?php echo esc_attr($settings['button_text']); ?>" class="regular-text" />
+                                <input type="text" name="nuvho_booking_mask_settings[button_text]" value="<?php echo esc_attr($settings['button_text']); ?>" class="regular-text" id="nuvho-button-text" />
                             </td>
                         </tr>
                         
                         <tr>
                             <th scope="row">Button Text Color:</th>
                             <td>
-                                <input type="text" name="nuvho_booking_mask_settings[button_text_color]" value="<?php echo esc_attr($settings['button_text_color']); ?>" class="nuvho-color-picker" />
+                                <input type="text" name="nuvho_booking_mask_settings[button_text_color]" value="<?php echo esc_attr($settings['button_text_color']); ?>" class="nuvho-color-picker" id="nuvho-button-text-color" />
                             </td>
                         </tr>
                         
                         <tr>
                             <th scope="row">Button Border Radius:</th>
                             <td>
-                                <select name="nuvho_booking_mask_settings[button_border_radius]">
+                                <select name="nuvho_booking_mask_settings[button_border_radius]" id="nuvho-button-radius">
                                     <?php foreach ($border_radius_options as $radius) : ?>
                                         <option value="<?php echo esc_attr($radius); ?>" <?php selected($settings['button_border_radius'], $radius); ?>><?php echo esc_html($radius); ?></option>
                                     <?php endforeach; ?>
@@ -444,7 +503,7 @@ $opacity_options = array(
                         <tr>
                             <th scope="row">Booking Mask Border Radius:</th>
                             <td>
-                                <select name="nuvho_booking_mask_settings[booking_mask_border_radius]">
+                                <select name="nuvho_booking_mask_settings[booking_mask_border_radius]" id="nuvho-mask-radius">
                                     <?php foreach ($border_radius_options as $radius) : ?>
                                         <option value="<?php echo esc_attr($radius); ?>" <?php selected($settings['booking_mask_border_radius'], $radius); ?>><?php echo esc_html($radius); ?></option>
                                     <?php endforeach; ?>
@@ -466,7 +525,7 @@ $opacity_options = array(
                         <tr>
                             <th scope="row">Font:</th>
                             <td>
-                                <select name="nuvho_booking_mask_settings[font]">
+                                <select name="nuvho_booking_mask_settings[font]" id="nuvho-font">
                                     <?php foreach ($fonts as $font) : ?>
                                         <option value="<?php echo esc_attr($font); ?>" <?php selected($settings['font'], $font); ?>><?php echo esc_html($font); ?></option>
                                     <?php endforeach; ?>
@@ -479,5 +538,263 @@ $opacity_options = array(
                 <?php submit_button('Save Changes', 'primary', 'submit', true); ?>
             </div>
         </div>
+        
+        <div class="nuvho-shortcode-info">
+            <h3>Shortcode</h3>
+            <p>Use this shortcode to display the booking mask on any page or post:</p>
+            <code>[nuvho_booking_mask_single]</code>
+        </div>
     </form>
 </div>
+
+<script>
+jQuery(document).ready(function($) {
+    // Add theme selection styling
+    $('<style>')
+        .text(`
+            #nuvho-theme-selector {
+                min-width: 200px;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background: white;
+                font-size: 14px;
+            }
+            
+            .nuvho-theme-preview {
+                margin-top: 10px;
+                padding: 15px;
+                border: 2px solid #e1e1e1;
+                border-radius: 8px;
+                background: #f9f9f9;
+                display: none;
+            }
+            
+            .nuvho-theme-preview.active {
+                display: block;
+                border-color: #5a9fd4;
+                background: #f0f8ff;
+            }
+            
+            .nuvho-theme-info {
+                font-size: 13px;
+                color: #666;
+                font-style: italic;
+            }
+        `)
+        .appendTo('head');
+    
+    // Theme presets data
+    var themePresets = <?php echo json_encode($theme_presets); ?>;
+    
+    // Add theme description after the select
+    $('#nuvho-theme-selector').after('<div class="nuvho-theme-info" id="theme-info"></div>');
+    
+    // Handle booking option changes to show/hide specific settings
+    $('#nuvho-booking-option').on('change', function() {
+        var selectedOption = $(this).val();
+        
+        // Hide all specific settings
+        $('#simple-booking-specific-settings, #accor-specific-settings').hide();
+        
+        // Show relevant settings based on selection
+        if (selectedOption.indexOf('Simple Booking') !== -1) {
+            $('#simple-booking-specific-settings').show();
+        } else if (selectedOption === 'Accor') {
+            $('#accor-specific-settings').show();
+        }
+    });
+    
+    // Initialize booking option settings on page load
+    $('#nuvho-booking-option').trigger('change');
+    
+    // Handle promo code checkbox toggle
+    $('#nuvho-show-promo-code').on('change', function() {
+        var promoField = $('#nuvho-preview-promo-field');
+        if ($(this).is(':checked')) {
+            promoField.slideDown(200);
+        } else {
+            promoField.slideUp(200);
+        }
+    });
+    
+    // Initialize promo code field visibility based on current setting
+    var promoCheckbox = $('#nuvho-show-promo-code');
+    if (promoCheckbox.length && promoCheckbox.is(':checked')) {
+        $('#nuvho-preview-promo-field').show();
+    } else {
+        $('#nuvho-preview-promo-field').hide();
+    }
+    
+    // Handle theme selection
+    $('#nuvho-theme-selector').on('change', function() {
+        var selectedTheme = $(this).val();
+        var infoDiv = $('#theme-info');
+        
+        if (selectedTheme && themePresets[selectedTheme]) {
+            var preset = themePresets[selectedTheme];
+            
+            // Show theme info
+            if (selectedTheme === 'ocean_breeze') {
+                infoDiv.html('<strong>Ocean Breeze:</strong> Clean, modern design with professional teal color scheme and optimized user experience.').show();
+            } else if (selectedTheme === 'default') {
+                infoDiv.html('<strong>Default Theme:</strong> Classic WordPress-style appearance with blue accents.').show();
+            } else if (selectedTheme === 'sunset_coral') {
+                infoDiv.html('<strong>Sunset Coral:</strong> Warm and inviting coral theme perfect for tropical or beach resorts.').show();
+            } else if (selectedTheme === 'forest_green') {
+                infoDiv.html('<strong>Forest Green:</strong> Nature-inspired emerald green theme ideal for eco-friendly or outdoor accommodations.').show();
+            } else if (selectedTheme === 'royal_purple') {
+                infoDiv.html('<strong>Royal Purple:</strong> Elegant and sophisticated purple theme for luxury hotels and premium properties.').show();
+            } else if (selectedTheme === 'midnight_dark') {
+                infoDiv.html('<strong>Midnight Dark:</strong> Sleek dark theme with light accents, perfect for modern boutique hotels.').show();
+            }
+            
+            // Update form fields
+            $('#nuvho-bg-color').val(preset.background_color).trigger('change');
+            $('#nuvho-bg-opacity').val(preset.background_opacity).trigger('change');
+            $('#nuvho-button-color').val(preset.button_color).trigger('change');
+            $('#nuvho-button-text-color').val(preset.button_text_color).trigger('change');
+            $('#nuvho-font-color').val(preset.font_color).trigger('change');
+            $('#nuvho-button-text').val(preset.button_text).trigger('change');
+            $('#nuvho-button-radius').val(preset.button_border_radius).trigger('change');
+            $('#nuvho-mask-radius').val(preset.booking_mask_border_radius).trigger('change');
+            $('#nuvho-font').val(preset.font).trigger('change');
+            
+            // Update color pickers
+            $('.nuvho-color-picker').each(function() {
+                if ($(this).hasClass('wp-color-picker')) {
+                    $(this).wpColorPicker('color', $(this).val());
+                }
+            });
+            
+            // Trigger preview update
+            setTimeout(updateLivePreview, 100);
+            
+            // Show success message
+            $('<div class="notice notice-success is-dismissible"><p><strong>Theme Applied!</strong> ' + preset.name + ' settings have been loaded. Click "Save Changes" to make them permanent.</p></div>')
+                .insertAfter('.wrap h1')
+                .delay(4000)
+                .fadeOut();
+        } else {
+            infoDiv.hide();
+        }
+    });
+    
+    // Update live preview function
+    function updateLivePreview() {
+        var bgColor = $('#nuvho-bg-color').val();
+        var bgOpacity = $('#nuvho-bg-opacity').val().replace('%', '') / 100;
+        var buttonColor = $('#nuvho-button-color').val();
+        var buttonTextColor = $('#nuvho-button-text-color').val();
+        var fontColor = $('#nuvho-font-color').val();
+        var buttonText = $('#nuvho-button-text').val();
+        var buttonRadius = $('#nuvho-button-radius').val();
+        var maskRadius = $('#nuvho-mask-radius').val();
+        var font = $('#nuvho-font').val();
+        
+        // Convert hex to rgba for background
+        var rgba = hexToRgba(bgColor, bgOpacity);
+        
+        // Apply styles to preview
+        var previewContainer = $('#nuvho-preview-container');
+        var previewForm = previewContainer.find('.nuvho-booking-form');
+        var previewButton = previewContainer.find('.nuvho-submit-btn');
+        
+        // Update container styles
+        previewContainer.css({
+            'background-color': rgba,
+            'border-radius': maskRadius === 'Rounded' ? '8px' : (maskRadius === 'Pill' ? '20px' : '0')
+        });
+        
+        // Update form styles
+        previewForm.css({
+            'color': fontColor,
+            'font-family': font === 'Default' ? 'inherit' : font
+        });
+        
+        // Update button styles
+        previewButton.css({
+            'background-color': buttonColor,
+            'color': buttonTextColor,
+            'border-radius': buttonRadius === 'Rounded' ? '8px' : (buttonRadius === 'Pill' ? '20px' : '0')
+        }).text(buttonText);
+        
+        // Apply theme-specific styling
+        var selectedTheme = $('#nuvho-theme-selector').val();
+        if (selectedTheme === 'ocean_breeze') {
+            // Add Ocean Breeze specific styling
+            previewContainer.css({
+                'box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
+                'border': '1px solid #e2e8f0'
+            });
+            
+            // Style form fields for Ocean Breeze theme
+            previewContainer.find('input, select, button').css({
+                'border-radius': '6px',
+                'border': '1px solid #d1d5db'
+            });
+            
+            previewContainer.find('.nuvho-date-picker').css({
+                'background': 'white',
+                'padding': '12px',
+                'font-size': '14px'
+            });
+        } else if (selectedTheme === 'midnight_dark') {
+            // Add Midnight Dark specific styling
+            previewContainer.css({
+                'box-shadow': '0 4px 12px rgba(0,0,0,0.3)',
+                'border': '1px solid #374151'
+            });
+            
+            // Style form fields for dark theme
+            previewContainer.find('input, select').css({
+                'background-color': '#374151',
+                'border': '1px solid #4b5563',
+                'color': '#f9fafb'
+            });
+            
+            previewContainer.find('label').css({
+                'color': '#f9fafb'
+            });
+        } else if (selectedTheme === 'sunset_coral') {
+            // Add Sunset Coral warm styling
+            previewContainer.css({
+                'box-shadow': '0 2px 8px rgba(255,107,71,0.1)',
+                'border': '1px solid #fed7d7'
+            });
+        } else if (selectedTheme === 'forest_green') {
+            // Add Forest Green natural styling
+            previewContainer.css({
+                'box-shadow': '0 2px 8px rgba(16,185,129,0.1)',
+                'border': '1px solid #d1fae5'
+            });
+        } else if (selectedTheme === 'royal_purple') {
+            // Add Royal Purple elegant styling
+            previewContainer.css({
+                'box-shadow': '0 2px 8px rgba(139,92,246,0.1)',
+                'border': '1px solid #e9d5ff'
+            });
+        }
+    }
+    
+    // Convert hex to rgba
+    function hexToRgba(hex, alpha) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        if (result) {
+            var r = parseInt(result[1], 16);
+            var g = parseInt(result[2], 16);
+            var b = parseInt(result[3], 16);
+            return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+        }
+        return hex;
+    }
+    
+    // Trigger preview update when any appearance setting changes
+    $('#nuvho-bg-color, #nuvho-bg-opacity, #nuvho-button-color, #nuvho-button-text-color, #nuvho-font-color, #nuvho-button-text, #nuvho-button-radius, #nuvho-mask-radius, #nuvho-font').on('change input', function() {
+        setTimeout(updateLivePreview, 50);
+    });
+    
+    // Initial preview update
+    setTimeout(updateLivePreview, 200);
+});
+</script>
