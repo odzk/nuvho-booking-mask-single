@@ -4,7 +4,7 @@
  * Plugin Name:       Nuvho Booking Mask (Single)
  * Plugin URI:        https://support.herobe.com/nuvho-booking-mask/
  * Description:       Nuvho Single Booking Mask. Universal booking mask for single property. Easy to use, no coding required. Customizable, responsive, multilingual, GDPR compliant.
- * Version:           2.0.2
+ * Version:           2.1.0
  * Author:            Odysseus Ambut / Herobe
  * Author URI:        https://herobe.com
  * License:           GPL-2.0+
