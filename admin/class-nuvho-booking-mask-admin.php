@@ -136,6 +136,8 @@ class Nuvho_Booking_Mask_Admin {
             array($this, 'display_settings_page')
         );
         
+        // REPORTS MENU - TEMPORARILY HIDDEN
+        /*
         add_submenu_page(
             'nuvho-booking-mask',
             'Reports',
@@ -144,6 +146,7 @@ class Nuvho_Booking_Mask_Admin {
             'nuvho-booking-mask-reports',
             array($this, 'display_reports_page')
         );
+        */
     }
 
     /**

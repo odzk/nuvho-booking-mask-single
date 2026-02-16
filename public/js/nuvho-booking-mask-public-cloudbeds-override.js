@@ -22,7 +22,7 @@ jQuery(document).ready(function($) {
             var children = $('#nuvho-kids-input').val();
             
             // Create the correctly formatted Cloudbeds URL
-            var baseUrl = 'https://us2.cloudbeds.com/en/reservation';
+            var baseUrl = 'https://hotels.cloudbeds.com/en/reservation';
             
             // Clean the hotel ID (remove any slashes)
             hotelId = hotelId.replace(/\//g, '');
