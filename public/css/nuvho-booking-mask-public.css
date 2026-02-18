@@ -112,9 +112,7 @@
 .daterangepicker td.active, 
 .daterangepicker td.active:hover,
 .daterangepicker td.in-range.active {
-    background-color: #4c7380 !important;
-    border-color: #4c7380 !important;
-    color: #fff !important;
+
 }
 
 .daterangepicker td.in-range {

@@ -84,6 +84,26 @@ class Nuvho_Booking_Mask_Public {
         
         // Localize script with settings data
         $settings = get_option('nuvho_booking_mask_settings');
+
+        // Guard: if settings have never been saved, use safe defaults to avoid fatal errors
+        if (empty($settings) || !is_array($settings)) {
+            $settings = array(
+                'language'                   => 'English (US)',
+                'currency'                   => 'USD',
+                'background_color'           => '#4c7380',
+                'background_opacity'         => '100%',
+                'button_color'               => '#4c7380',
+                'button_text_color'          => '#ffffff',
+                'button_text'               => 'Book Now',
+                'font_color'                => '#ffffff',
+                'font'                      => 'Default',
+                'option'                    => '',
+                'url'                       => '',
+                'hotel_id'                  => '',
+                'booking_mask_border_radius' => 'Square',
+                'button_border_radius'       => 'Square',
+            );
+        }
         
         // Add date formatting and locale settings for daterangepicker
         $locale_map = array(
@@ -135,7 +155,7 @@ class Nuvho_Booking_Mask_Public {
         $table_name = $wpdb->prefix . 'nuvho_booking_mask_reports';
         
         $settings = get_option('nuvho_booking_mask_settings');
-        $booking_engine = $settings['option'];
+        $booking_engine = !empty($settings['option']) ? $settings['option'] : 'unknown';
         
         // Get today's record if exists
         $today = current_time('Y-m-d');
@@ -207,6 +227,26 @@ class Nuvho_Booking_Mask_Public {
     public function display_booking_mask($atts) {
         // Get settings
         $settings = get_option('nuvho_booking_mask_settings');
+
+        // Guard: if settings have never been saved, use safe defaults to avoid fatal errors
+        if (empty($settings) || !is_array($settings)) {
+            $settings = array(
+                'language'                   => 'English (US)',
+                'currency'                   => 'USD',
+                'background_color'           => '#4c7380',
+                'background_opacity'         => '100%',
+                'button_color'               => '#4c7380',
+                'button_text_color'          => '#ffffff',
+                'button_text'               => 'Book Now',
+                'font_color'                => '#ffffff',
+                'font'                      => 'Default',
+                'option'                    => '',
+                'url'                       => '',
+                'hotel_id'                  => '',
+                'booking_mask_border_radius' => 'Square',
+                'button_border_radius'       => 'Square',
+            );
+        }
         
         // Track click (AJAX would be better for production)
         if (isset($_GET['nuvho_track']) && $_GET['nuvho_track'] === 'click') {

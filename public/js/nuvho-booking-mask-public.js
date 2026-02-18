@@ -64,7 +64,69 @@
                 $('.daterangepicker').addClass('nuvho-daterangepicker');
             }, 100);
         });
-        
+
+        // Inject datepicker active-state styles using the admin background color + opacity
+        (function injectDatepickerStyles() {
+            var hex     = (nuvhoBookingSettings.background_color || '#4c7380').replace('#', '');
+            var opacity = parseFloat(
+                (nuvhoBookingSettings.background_opacity || '100').toString().replace('%', '')
+            ) / 100;
+
+            // Parse hex → r, g, b
+            var r    = parseInt(hex.substring(0, 2), 16);
+            var g    = parseInt(hex.substring(2, 4), 16);
+            var b    = parseInt(hex.substring(4, 6), 16);
+            var rgba = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + opacity + ')';
+
+            var css = [
+                '.daterangepicker td.active,',
+                '.daterangepicker td.active:hover,',
+                '.daterangepicker td.start-date,',
+                '.daterangepicker td.start-date:hover,',
+                '.daterangepicker td.end-date,',
+                '.daterangepicker td.end-date:hover,',
+                '.daterangepicker td.start-date.in-range,',
+                '.daterangepicker td.start-date.in-range:hover,',
+                '.daterangepicker td.end-date.in-range,',
+                '.daterangepicker td.end-date.in-range:hover {',
+                '    background-color: ' + rgba + ' !important;',
+                '    border-color: '     + rgba + ' !important;',
+                '    color: #fff !important;',
+                '    opacity: 1 !important;',
+                '}',
+                '.daterangepicker td.in-range {',
+                '    background-color: ' + rgba + ' !important;',
+                '    opacity: 0.4;',
+                '}',
+                '.daterangepicker .drp-buttons .btn-primary {',
+                '    background-color: ' + rgba + ' !important;',
+                '    border-color: '     + rgba + ' !important;',
+                '}'
+            ].join('\n');
+
+            // Create our style tag
+            var style = document.createElement('style');
+            style.id   = 'nuvho-daterangepicker-colors';
+            style.type = 'text/css';
+            style.appendChild(document.createTextNode(css));
+            document.head.appendChild(style);
+
+            // Watch for daterangepicker injecting its own styles after ours,
+            // and move ours back to the end of <head> so we always win
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node !== style && (node.tagName === 'STYLE' || node.tagName === 'LINK')) {
+                            // Another stylesheet was added — move ours to the end
+                            document.head.appendChild(style);
+                        }
+                    });
+                });
+            });
+
+            observer.observe(document.head, { childList: true });
+        })();
+
         // Initialize original stepper controls if present (backward compatibility)
         $(document).on('click', '.nuvho-stepper-btn', function() {
             var input = $(this).data('input');
