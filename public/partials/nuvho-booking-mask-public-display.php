@@ -48,8 +48,8 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
     $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
 }
 
+$accent_color = esc_attr($background_color_with_opacity);
 ?>
-
 <div class="nuvho-booking-mask-container" 
      style="background-color: <?php echo esc_attr($background_color_with_opacity) ?>; 
             opacity: <?php echo esc_attr($opacity); ?>; 
@@ -153,10 +153,10 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
                 <span class="nuvho-label-suffix"><?php echo esc_html(((int)$adults === 1) ? __('Adult', 'nuvho-booking-mask') : __('Adults', 'nuvho-booking-mask')); ?></span>
             </div>
             <div class="nuvho-stepper-controls">
-                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults">
+                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults" style="background-color: <?php echo $accent_color; ?>;">
                     <span class="nuvho-btn-icon">−</span>
                 </button>
-                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults">
+                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults" style="background-color: <?php echo $accent_color; ?>;">
                     <span class="nuvho-btn-icon">+</span>
                 </button>
             </div>
@@ -169,10 +169,10 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
                 <span class="nuvho-label-suffix"><?php echo esc_html(((int)$children === 1) ? __('Kid', 'nuvho-booking-mask') : __('Kids', 'nuvho-booking-mask')); ?></span>
             </div>
             <div class="nuvho-stepper-controls">
-                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids">
+                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids" style="background-color: <?php echo $accent_color; ?>;">
                     <span class="nuvho-btn-icon">−</span>
                 </button>
-                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids">
+                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids" style="background-color: <?php echo $accent_color; ?>;">
                     <span class="nuvho-btn-icon">+</span>
                 </button>
             </div>
@@ -181,7 +181,7 @@ elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) 
         <!-- Modal buttons -->
         <div class="nuvho-modal-buttons">
             <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
-            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
+            <button type="button" class="nuvho-done-btn" style="background-color: <?php echo $accent_color; ?>;"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
         </div>
     </div>
 </div>
