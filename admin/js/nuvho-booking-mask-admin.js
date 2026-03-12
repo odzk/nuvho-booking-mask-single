@@ -127,6 +127,9 @@
             $('.nuvho-guest-trigger, .nuvho-guest-count, .nuvho-guest-count span').css('color', s.fontColor);
 
             $('#nuvho-preview-button').css({ 'background-color': s.btnColor, 'color': s.btnTextCol, 'border-radius': s.btnRadius }).text(s.btnText);
+
+            $('.nuvho-decrease:not(.disabled), .nuvho-increase').css('background-color', rgba);
+            $('.nuvho-done-btn').css('background-color', rgba);
         }
 
         function radius(v) { return v === 'Rounded' ? '8px' : (v === 'Pill' ? '20px' : '0'); }

@@ -183,6 +183,7 @@ $opacity_options = array(
                 $r = hexdec($m[1]); $g = hexdec($m[2]); $b = hexdec($m[3]);
                 $rgba = "rgba($r,$g,$b,$opacity)";
             }
+            $accent_color = esc_attr($rgba);
             ?>
             <div id="nuvho-preview-container" class="nuvho-booking-mask-container nuvho-public-mask"
                  style="background-color:<?php echo esc_attr($rgba); ?>;opacity:<?php echo esc_attr($opacity); ?>;border-radius:<?php echo esc_attr($border_radius); ?>;">
@@ -230,8 +231,8 @@ $opacity_options = array(
                                                 <span class="nuvho-label-suffix"><?php esc_html_e('Adults', 'nuvho-booking-mask'); ?></span>
                                             </div>
                                             <div class="nuvho-stepper-controls">
-                                                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults"><span class="nuvho-btn-icon">-</span></button>
-                                                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults"><span class="nuvho-btn-icon">+</span></button>
+                                                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults" style="background-color: <?php echo $accent_color; ?>;"><span class="nuvho-btn-icon">-</span></button>
+                                                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults" style="background-color: <?php echo $accent_color; ?>;"><span class="nuvho-btn-icon">+</span></button>
                                             </div>
                                         </div>
 
@@ -242,14 +243,14 @@ $opacity_options = array(
                                                 <span class="nuvho-label-suffix"><?php esc_html_e('Kids', 'nuvho-booking-mask'); ?></span>
                                             </div>
                                             <div class="nuvho-stepper-controls">
-                                                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids"><span class="nuvho-btn-icon">-</span></button>
-                                                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids"><span class="nuvho-btn-icon">+</span></button>
+                                                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids" style="background-color: <?php echo $accent_color; ?>;"><span class="nuvho-btn-icon">-</span></button>
+                                                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids" style="background-color: <?php echo $accent_color; ?>;"><span class="nuvho-btn-icon">+</span></button>
                                             </div>
                                         </div>
 
                                         <div class="nuvho-modal-buttons">
                                             <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
-                                            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
+                                            <button type="button" class="nuvho-done-btn" style="background-color: <?php echo $accent_color; ?>;"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
                                         </div>
                                     </div>
                                 </div>
