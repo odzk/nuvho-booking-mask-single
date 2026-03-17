@@ -92,6 +92,7 @@
                 '    background-color: ' + rgba + ' !important;',
                 '    border-color: '     + rgba + ' !important;',
                 '    color: #000 !important;',
+                '    font-weight: bold !important;',
                 '    opacity: 1 !important;',
                 '}',
                 '.daterangepicker td.in-range {',
