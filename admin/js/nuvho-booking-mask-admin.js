@@ -3,6 +3,10 @@
 
     $(document).ready(function() {
 
+        let lastValidParsed = {};
+        let cachedPublicCSS = null;
+        let suppressCSSSync = false;
+
         /* ------------------------------------------------------------------
          *  1. Load the same assets the public mask uses
          * ------------------------------------------------------------------ */
@@ -43,17 +47,26 @@
         });
 
         /* ------------------------------------------------------------------
-         *  3. Guest selector – **exact copy of public JS**
+         *  3. Guest selector – exact copy of public JS
          * ------------------------------------------------------------------ */
         let tempAdults = 2, tempKids = 0;
         let originalAdults, originalKids;
+
+        function getActivePreviewModal() {
+            var type = $('#nuvho-guest-selection-type').val();
+            return type === 'dropdown' ? $('#nuvho-preview-guest-modal-dropdown') : $('#nuvho-preview-guest-modal');
+        }
 
         $(document).on('click', '.nuvho-guest-trigger', function(e) {
             e.preventDefault();
             e.stopPropagation();
             originalAdults = tempAdults;
             originalKids   = tempKids;
-            $('#nuvho-preview-guest-modal').fadeIn(200);
+            var $modal = getActivePreviewModal();
+            // Sync dropdown selects if in dropdown mode
+            $modal.find('.nuvho-guest-dropdown[data-target="adults"]').val(tempAdults);
+            $modal.find('.nuvho-guest-dropdown[data-target="kids"]').val(tempKids);
+            $modal.fadeIn(200);
             updateGuestDisplay();
         });
 
@@ -69,24 +82,33 @@
         });
 
         $('.nuvho-done-btn').on('click', function() {
+            var $modal = getActivePreviewModal();
+            // If dropdown mode, read values from select elements
+            if ($modal.hasClass('nuvho-guest-modal-dropdown')) {
+                tempAdults = parseInt($modal.find('.nuvho-guest-dropdown[data-target="adults"]').val()) || 2;
+                tempKids = parseInt($modal.find('.nuvho-guest-dropdown[data-target="kids"]').val()) || 0;
+            }
             $('#nuvho-adults-input').val(tempAdults);
             $('#nuvho-kids-input').val(tempKids);
             $('.nuvho-adults-count, .nuvho-adults-number').text(tempAdults);
             $('.nuvho-kids-count, .nuvho-kids-number').text(tempKids);
-            $('#nuvho-preview-guest-modal').fadeOut(200);
+            $modal.fadeOut(200);
         });
 
         $('.nuvho-cancel-btn').on('click', function() {
             tempAdults = originalAdults;
             tempKids   = originalKids;
             updateGuestDisplay();
-            $('#nuvho-preview-guest-modal').fadeOut(200);
+            $('.nuvho-guest-modal').fadeOut(200);
         });
 
         $(document).on('click', function(e) {
-            const $modal = $('#nuvho-preview-guest-modal');
-            if ($modal.is(':visible') && !$(e.target).closest('.nuvho-guest-selector-container').length) {
-                $modal.fadeOut(200);
+            var $visibleModal = $('.nuvho-guest-modal:visible');
+            if ($visibleModal.length && !$(e.target).closest('.nuvho-guest-selector-container').length) {
+                tempAdults = originalAdults;
+                tempKids   = originalKids;
+                updateGuestDisplay();
+                $visibleModal.fadeOut(200);
             }
         });
 
@@ -98,9 +120,198 @@
         }
 
         /* ------------------------------------------------------------------
-         *  4. Live preview of all visual settings
+         *  4. Helpers
          * ------------------------------------------------------------------ */
-        $('.nuvho-color-picker').wpColorPicker({ change: updatePreview });
+        function radius(v) { return v === 'Rounded' ? '8px' : (v === 'Pill' ? '20px' : '0'); }
+
+        function hexToRgba(hex, a) {
+            const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            if (!m) return hex;
+            return `rgba(${parseInt(m[1],16)}, ${parseInt(m[2],16)}, ${parseInt(m[3],16)}, ${a})`;
+        }
+
+        function rgbaToHex(color) {
+            const m = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+            if (!m) return color;
+            return '#' + [m[1], m[2], m[3]].map(function(n) {
+                return ('0' + parseInt(n).toString(16)).slice(-2);
+            }).join('');
+        }
+
+        function getColorVal(settingName) {
+            const $el = $('input[name="nuvho_booking_mask_settings[' + settingName + ']"]');
+            try { return $el.wpColorPicker('color') || $el.val(); }
+            catch(e) { return $el.val(); }
+        }
+
+        /* ------------------------------------------------------------------
+         *  5. CSS find-and-replace engine
+         * ------------------------------------------------------------------ */
+
+        // Find selector block in CSS text, replace (or insert) a property value.
+        // Only modifies the FIRST match — top-level rules, not those inside @media.
+        function updateCSSProperty(cssText, selector, property, newValue) {
+            var esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var blockRegex = new RegExp('(' + esc + '\\s*\\{)([^}]*)(\\})', 'g');
+            var found = false;
+            return cssText.replace(blockRegex, function(match, open, body, close) {
+                if (found) return match;
+                found = true;
+                var propRegex = new RegExp('(\\s*' + property + '\\s*:\\s*)([^;]+)(;)');
+                if (propRegex.test(body)) {
+                    body = body.replace(propRegex, '$1' + newValue + '$3');
+                } else {
+                    body = body.trimEnd() + '\n    ' + property + ': ' + newValue + ';\n';
+                }
+                return open + body + close;
+            });
+        }
+
+        // Push current form settings into the CSS textarea via in-place find-and-replace
+        function syncSettingsToCSS() {
+            if (suppressCSSSync) return;
+            if (!$('#nuvho-show-css-toggle').is(':checked')) return;
+            var ta = document.getElementById('nuvho-custom-css');
+            if (!ta || !ta.value) return;
+
+            var css = ta.value;
+            var bgColor  = getColorVal('background_color');
+            var opacity  = parseInt($('select[name="nuvho_booking_mask_settings[background_opacity]"]').val()) / 100;
+            var fontColor = getColorVal('font_color');
+            var font     = $('select[name="nuvho_booking_mask_settings[font]"]').val();
+            var maskR    = radius($('select[name="nuvho_booking_mask_settings[booking_mask_border_radius]"]').val());
+            var btnColor = getColorVal('button_color');
+            var btnTxt   = getColorVal('button_text_color');
+            var btnR     = radius($('select[name="nuvho_booking_mask_settings[button_border_radius]"]').val());
+            var dpColor  = getColorVal('datepicker_color') || '#4c7380';
+            var dpTxt    = getColorVal('datepicker_text_color') || '#ffffff';
+
+            css = updateCSSProperty(css, '.nuvho-booking-mask-container', 'background-color', hexToRgba(bgColor, opacity));
+            css = updateCSSProperty(css, '.nuvho-booking-mask-container', 'border-radius', maskR);
+            css = updateCSSProperty(css, '.nuvho-booking-mask-container', 'opacity', String(opacity));
+            css = updateCSSProperty(css, '.nuvho-booking-form', 'color', fontColor);
+            css = updateCSSProperty(css, '.nuvho-booking-form', 'font-family', font === 'Default' ? 'inherit' : font);
+            css = updateCSSProperty(css, '.nuvho-submit-field button[type="submit"]', 'background-color', btnColor);
+            css = updateCSSProperty(css, '.nuvho-submit-field button[type="submit"]', 'color', btnTxt);
+            css = updateCSSProperty(css, '.nuvho-submit-field button[type="submit"]', 'border-radius', btnR);
+            css = updateCSSProperty(css, '.daterangepicker td.active', 'background-color', dpColor);
+            css = updateCSSProperty(css, '.daterangepicker td.active', 'border-color', dpColor);
+            css = updateCSSProperty(css, '.daterangepicker td.active', 'color', dpTxt);
+            css = updateCSSProperty(css, '.daterangepicker td.in-range', 'background-color', dpColor);
+            css = updateCSSProperty(css, '.daterangepicker .drp-buttons .btn.btn-primary', 'background-color', dpColor);
+            css = updateCSSProperty(css, '.daterangepicker .drp-buttons .btn.btn-primary', 'border-color', dpColor);
+
+            ta.value = css;
+
+            // Re-parse so lastValidParsed reflects the updated CSS
+            var parsed = parseCSSToProps(css);
+            if (Object.keys(parsed).length > 0) lastValidParsed = parsed;
+        }
+
+        /* ------------------------------------------------------------------
+         *  6. CSS parsing and preview application
+         * ------------------------------------------------------------------ */
+
+        // Parse CSS text into { selector: { property: value } } map
+        function parseCSSToProps(cssText) {
+            var result = {};
+            var tempStyle = document.createElement('style');
+            tempStyle.textContent = cssText;
+            document.head.appendChild(tempStyle);
+            try {
+                Array.from(tempStyle.sheet.cssRules || []).forEach(function(rule) {
+                    if (!rule.selectorText || !rule.style) return;
+                    var sel = rule.selectorText.trim();
+                    result[sel] = result[sel] || {};
+                    for (var i = 0; i < rule.style.length; i++) {
+                        var prop = rule.style[i];
+                        result[sel][prop] = rule.style.getPropertyValue(prop);
+                    }
+                });
+            } catch(e) {}
+            document.head.removeChild(tempStyle);
+            return result;
+        }
+
+        var cssPreviewMap = {
+            '.nuvho-booking-mask-container':             '#nuvho-preview-container',
+            '.nuvho-booking-form':                       '#nuvho-preview-container .nuvho-booking-form',
+            '.nuvho-submit-field button':                '#nuvho-preview-button',
+            '.nuvho-submit-field button[type="submit"]': '#nuvho-preview-button',
+            '.nuvho-submit-field':                       '#nuvho-preview-container .nuvho-submit-field',
+            '.daterangepicker td.active':                '.daterangepicker td.active',
+            '.daterangepicker td.in-range':              '.daterangepicker td.in-range',
+            '.daterangepicker .drp-buttons .btn.btn-primary': '.daterangepicker .drp-buttons .btn.btn-primary',
+        };
+
+        function applyParsedCSS(parsed) {
+            Object.keys(parsed).forEach(function(sel) {
+                var previewSel = cssPreviewMap[sel];
+                if (!previewSel) return;
+                var $el = $(previewSel);
+                if (!$el.length) return;
+                var props = parsed[sel];
+                Object.keys(props).forEach(function(prop) {
+                    $el.css(prop, props[prop]);
+                });
+            });
+        }
+
+        function syncFormFromCSS(parsed) {
+            function setColor(selector, hex) {
+                var $el = $(selector);
+                if (!$el.length) return;
+                $el.val(hex);
+                try { $el.wpColorPicker('color', hex); } catch(e) { $el.trigger('change'); }
+            }
+            function setSelect(selector, val) {
+                var $el = $(selector);
+                if (!$el.length || !$el.find('option[value="' + val + '"]').length) return;
+                $el.val(val).trigger('change');
+            }
+            function radiusToOption(v) {
+                if (v === '8px')  return 'Rounded';
+                if (v === '20px') return 'Pill';
+                if (v === '0px' || v === '0') return 'Square';
+                return null;
+            }
+
+            Object.keys(parsed).forEach(function(sel) {
+                var props = parsed[sel];
+                if (sel === '.nuvho-booking-mask-container') {
+                    if (props['background-color']) setColor('#nuvho-bg-color', rgbaToHex(props['background-color']));
+                    if (props['border-radius']) {
+                        var opt = radiusToOption(props['border-radius']);
+                        if (opt) setSelect('select[name="nuvho_booking_mask_settings[booking_mask_border_radius]"]', opt);
+                    }
+                }
+                if (sel === '.nuvho-booking-form') {
+                    if (props['color']) setColor('#nuvho-font-color', rgbaToHex(props['color']));
+                    if (props['font-family']) {
+                        var fontName = props['font-family'].split(',')[0].trim().replace(/['"]/g, '');
+                        var displayName = fontName === 'inherit' ? 'Default' : fontName;
+                        setSelect('select[name="nuvho_booking_mask_settings[font]"]', displayName);
+                    }
+                }
+                if (sel === '.nuvho-submit-field button[type="submit"]' || sel === '.nuvho-submit-field button') {
+                    if (props['background-color']) setColor('#nuvho-button-color', rgbaToHex(props['background-color']));
+                    if (props['color'])            setColor('#nuvho-button-text-color', rgbaToHex(props['color']));
+                    if (props['border-radius']) {
+                        var btnOpt = radiusToOption(props['border-radius']);
+                        if (btnOpt) setSelect('select[name="nuvho_booking_mask_settings[button_border_radius]"]', btnOpt);
+                    }
+                }
+                if (sel === '.daterangepicker td.active') {
+                    if (props['background-color']) setColor('#nuvho-datepicker-color', rgbaToHex(props['background-color']));
+                    if (props['color'])            setColor('#nuvho-datepicker-text-color', rgbaToHex(props['color']));
+                }
+            });
+        }
+
+        /* ------------------------------------------------------------------
+         *  7. Live preview of all visual settings
+         * ------------------------------------------------------------------ */
+        $('.nuvho-color-picker').not('#nuvho-datepicker-color, #nuvho-datepicker-text-color').wpColorPicker({ change: updatePreview });
         $('select[name^="nuvho_booking_mask_settings"], input[name^="nuvho_booking_mask_settings"]').on('change input', updatePreview);
         $('input[name="nuvho_booking_mask_settings[show_promo_code]"]').on('change', function() {
             $('#nuvho-preview-promo-field').toggle($(this).is(':checked'));
@@ -108,48 +319,65 @@
         });
 
         function updatePreview() {
-            const s = {};
-            s.bg         = $('input[name="nuvho_booking_mask_settings[background_color]"]').wpColorPicker('color') || $('input[name="nuvho_booking_mask_settings[background_color]"]').val();
+            var s = {};
+            s.bg         = getColorVal('background_color');
             s.opacity    = parseInt($('select[name="nuvho_booking_mask_settings[background_opacity]"]').val()) / 100;
-            s.btnColor   = $('input[name="nuvho_booking_mask_settings[button_color]"]').wpColorPicker('color') || $('input[name="nuvho_booking_mask_settings[button_color]"]').val();
-            s.btnTextCol = $('input[name="nuvho_booking_mask_settings[button_text_color]"]').wpColorPicker('color') || $('input[name="nuvho_booking_mask_settings[button_text_color]"]').val();
-            s.fontColor  = $('input[name="nuvho_booking_mask_settings[font_color]"]').wpColorPicker('color') || $('input[name="nuvho_booking_mask_settings[font_color]"]').val();
+            s.btnColor   = getColorVal('button_color');
+            s.btnTextCol = getColorVal('button_text_color');
+            s.fontColor  = getColorVal('font_color');
             s.btnText    = $('input[name="nuvho_booking_mask_settings[button_text]"]').val();
             s.font       = $('select[name="nuvho_booking_mask_settings[font]"]').val();
             s.maskRadius = radius($('select[name="nuvho_booking_mask_settings[booking_mask_border_radius]"]').val());
             s.btnRadius  = radius($('select[name="nuvho_booking_mask_settings[button_border_radius]"]').val());
+            s.dpColor    = getColorVal('datepicker_color') || '#4c7380';
+            s.dpTextCol  = getColorVal('datepicker_text_color') || '#ffffff';
 
-            const rgba = hexToRgba(s.bg, s.opacity);
+            var rgba = hexToRgba(s.bg, s.opacity);
             $('#nuvho-preview-container').css({ 'background-color': rgba, 'opacity': s.opacity, 'border-radius': s.maskRadius });
 
-            const family = s.font === 'Default' ? 'inherit' : s.font;
+            var family = s.font === 'Default' ? 'inherit' : s.font;
             $('.nuvho-booking-form, #nuvho-preview-promo-field label').css({ 'color': s.fontColor, 'font-family': family });
             $('.nuvho-guest-trigger, .nuvho-guest-count, .nuvho-guest-count span').css('color', s.fontColor);
 
             $('#nuvho-preview-button').css({ 'background-color': s.btnColor, 'color': s.btnTextCol, 'border-radius': s.btnRadius }).text(s.btnText);
 
             $('.nuvho-decrease:not(.disabled), .nuvho-increase').css('background-color', rgba);
-            $('.nuvho-done-btn').css('background-color', rgba);
-        }
+            $('.nuvho-done-btn').css('background-color', s.btnColor);
 
-        function radius(v) { return v === 'Rounded' ? '8px' : (v === 'Pill' ? '20px' : '0'); }
-        function hexToRgba(hex, a) {
-            const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            if (!m) return hex;
-            return `rgba(${parseInt(m[1],16)},${parseInt(m[2],16)},${parseInt(m[3],16)},${a})`;
+            // Datepicker colors via <style> tag (survives calendar re-renders)
+            var dpCSS = '.daterangepicker td.active, .daterangepicker td.start-date, .daterangepicker td.end-date,'
+                + ' .daterangepicker td.active:hover, .daterangepicker td.start-date:hover, .daterangepicker td.end-date:hover,'
+                + ' .daterangepicker td.start-date.in-range, .daterangepicker td.start-date.in-range:hover,'
+                + ' .daterangepicker td.end-date.in-range, .daterangepicker td.end-date.in-range:hover'
+                + ' { background-color: ' + s.dpColor + ' !important; border-color: ' + s.dpColor + ' !important; color: ' + s.dpTextCol + ' !important; opacity: 1 !important; }'
+                + ' .daterangepicker td.in-range { background-color: ' + s.dpColor + ' !important; opacity: 0.4; }'
+                + ' .daterangepicker .drp-buttons .btn-primary { background-color: ' + s.dpColor + ' !important; border-color: ' + s.dpColor + ' !important; }';
+            var $dpStyle = $('#nuvho-admin-dp-preview');
+            if (!$dpStyle.length) {
+                $dpStyle = $('<style id="nuvho-admin-dp-preview">').appendTo('head');
+            }
+            $dpStyle.text(dpCSS);
+
+            // Sync settings into CSS textarea (in-place find-and-replace)
+            syncSettingsToCSS();
+
+            // Re-apply custom CSS on top of inline styles for preview
+            if ($('#nuvho-show-css-toggle').is(':checked')) {
+                applyParsedCSS(lastValidParsed);
+            }
         }
 
         /* ------------------------------------------------------------------
-         *  5. Engine selector – show correct panels & default URL
+         *  8. Engine selector – show correct panels & default URL
          * ------------------------------------------------------------------ */
         $('#nuvho-booking-option').on('change', function() {
-            const e = $(this).val();
+            var e = $(this).val();
             $('#hotel-id-label').text(e === 'SiteMinder' ? 'Property:' : 'Hotel ID:');
             $('#accor-specific-settings, #simple-booking-specific-settings').hide();
             if (e === 'Accor') $('#accor-specific-settings').show();
             if (e.includes('Simple Booking')) $('#simple-booking-specific-settings').show();
 
-            const defaults = {
+            var defaults = {
                 'Accor':'https://all.accor.com/ssr/app/accor/rates',
                 'Simple Booking v1':'https://www.simplebooking.it/ibe/search',
                 'Simple Booking v2':'https://www.simplebooking.it/ibe2/hotel',
@@ -166,8 +394,102 @@
         }).trigger('change');
 
         /* ------------------------------------------------------------------
-         *  6. Initial render
+         *  8b. Guest Selection Type toggle (stepper ↔ dropdown preview)
          * ------------------------------------------------------------------ */
+        $('#nuvho-guest-selection-type').on('change', function() {
+            var type = $(this).val();
+            if (type === 'dropdown') {
+                $('#nuvho-preview-guest-modal').hide();
+                $('#nuvho-preview-guest-modal-dropdown').hide(); // will show on trigger click
+            } else {
+                $('#nuvho-preview-guest-modal-dropdown').hide();
+                $('#nuvho-preview-guest-modal').hide(); // will show on trigger click
+            }
+        });
+
+        /* ------------------------------------------------------------------
+         *  9. Advanced: Show advanced options
+         * ------------------------------------------------------------------ */
+        $('#nuvho-show-css-toggle').on('change', function() {
+            var cssRow = document.getElementById('nuvho-css-editor-row');
+            $('#nuvho-datepicker-color-row, #nuvho-datepicker-text-color-row').toggle(this.checked);
+            if (this.checked) {
+                // Re-initialize WP Color Picker now that fields are visible
+                $('#nuvho-datepicker-color, #nuvho-datepicker-text-color').wpColorPicker({ change: updatePreview });
+                cssRow.style.display = '';
+                var ta = document.getElementById('nuvho-custom-css');
+                var isStale = ta.value.includes('/* Auto-generated') ||
+                              ta.value.includes('/* == Appearance Settings Override') ||
+                              (ta.value.trim().length > 0 && ta.value.trim().length < 1000);
+                if (!ta.value.trim() || isStale) {
+                    // Empty or stale — fetch full public CSS and apply current settings
+                    function populateTextarea() {
+                        ta.value = cachedPublicCSS || '';
+                        // Apply current settings values into the fetched CSS
+                        suppressCSSSync = false;
+                        syncSettingsToCSS();
+                        var parsed = parseCSSToProps(ta.value);
+                        if (Object.keys(parsed).length > 0) {
+                            lastValidParsed = parsed;
+                            updatePreview();
+                        }
+                    }
+                    if (cachedPublicCSS !== null) {
+                        populateTextarea();
+                    } else {
+                        $.get(nuvhoAdminData.public_css_url).done(function(css) {
+                            cachedPublicCSS = css;
+                            populateTextarea();
+                        }).fail(function() {
+                            cachedPublicCSS = '';
+                            populateTextarea();
+                        });
+                    }
+                } else {
+                    // User's saved CSS — just parse and apply
+                    var parsed = parseCSSToProps(ta.value.trim());
+                    if (Object.keys(parsed).length > 0) {
+                        lastValidParsed = parsed;
+                        updatePreview();
+                    }
+                }
+            } else {
+                cssRow.style.display = 'none';
+                lastValidParsed = {};
+                updatePreview();
+            }
+        });
+
+        /* ------------------------------------------------------------------
+         *  10. CSS textarea input handler (CSS → settings + preview)
+         * ------------------------------------------------------------------ */
+        $('#nuvho-custom-css').on('input', function() {
+            var cssText = this.value.trim();
+            if (!cssText) {
+                lastValidParsed = {};
+                updatePreview();
+                return;
+            }
+            var parsed = parseCSSToProps(cssText);
+            if (Object.keys(parsed).length === 0) return;
+            lastValidParsed = parsed;
+            suppressCSSSync = true;
+            syncFormFromCSS(parsed);
+            updatePreview();
+            suppressCSSSync = false;
+        });
+
+        /* ------------------------------------------------------------------
+         *  11. Page-load initialisation
+         * ------------------------------------------------------------------ */
+        if ($('#nuvho-show-css-toggle').is(':checked')) {
+            var ta = document.getElementById('nuvho-custom-css');
+            if (ta && ta.value.trim()) {
+                var parsed = parseCSSToProps(ta.value.trim());
+                if (Object.keys(parsed).length > 0) lastValidParsed = parsed;
+            }
+        }
+
         setTimeout(updatePreview, 150); // after WPColorPicker init
     });
 

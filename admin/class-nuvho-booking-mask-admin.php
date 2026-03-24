@@ -79,6 +79,9 @@ class Nuvho_Booking_Mask_Admin {
 
         wp_enqueue_script('wp-color-picker');
         wp_enqueue_script($this->plugin_name, NUVHO_BOOKING_MASK_PLUGIN_URL . 'admin/js/nuvho-booking-mask-admin.js', array('jquery', 'wp-color-picker'), $this->version, false);
+        wp_localize_script($this->plugin_name, 'nuvhoAdminData', array(
+            'public_css_url' => NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/css/nuvho-booking-mask-public.css',
+        ));
 
         // Load the exact same assets the public mask uses
         wp_enqueue_style('daterangepicker', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css', [], '3.1.0');

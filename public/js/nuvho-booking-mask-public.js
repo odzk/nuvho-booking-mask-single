@@ -65,70 +65,6 @@
             }, 100);
         });
 
-        // Inject datepicker active-state styles using the admin background color + opacity
-        (function injectDatepickerStyles() {
-            var hex     = (nuvhoBookingSettings.background_color || '#4c7380').replace('#', '');
-            var opacity = parseFloat(
-                (nuvhoBookingSettings.background_opacity || '100').toString().replace('%', '')
-            ) / 100;
-
-            // Parse hex → r, g, b
-            var r    = parseInt(hex.substring(0, 2), 16);
-            var g    = parseInt(hex.substring(2, 4), 16);
-            var b    = parseInt(hex.substring(4, 6), 16);
-            var rgba = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + opacity + ')';
-
-            var css = [
-                '.daterangepicker td.active,',
-                '.daterangepicker td.active:hover,',
-                '.daterangepicker td.start-date,',
-                '.daterangepicker td.start-date:hover,',
-                '.daterangepicker td.end-date,',
-                '.daterangepicker td.end-date:hover,',
-                '.daterangepicker td.start-date.in-range,',
-                '.daterangepicker td.start-date.in-range:hover,',
-                '.daterangepicker td.end-date.in-range,',
-                '.daterangepicker td.end-date.in-range:hover {',
-                '    background-color: ' + rgba + ' !important;',
-                '    border-color: '     + rgba + ' !important;',
-                '    color: #000 !important;',
-                '    font-weight: bold !important;',
-                '    opacity: 1 !important;',
-                '}',
-                '.daterangepicker td.in-range {',
-                '    background-color: ' + rgba + ' !important;',
-                '    color: #555 !important;',
-                '    opacity: 0.4;',
-                '}',
-                '.daterangepicker .drp-buttons .btn-primary {',
-                '    background-color: ' + rgba + ' !important;',
-                '    border-color: '     + rgba + ' !important;',
-                '}'
-            ].join('\n');
-
-            // Create our style tag
-            var style = document.createElement('style');
-            style.id   = 'nuvho-daterangepicker-colors';
-            style.type = 'text/css';
-            style.appendChild(document.createTextNode(css));
-            document.head.appendChild(style);
-
-            // Watch for daterangepicker injecting its own styles after ours,
-            // and move ours back to the end of <head> so we always win
-            var observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node !== style && (node.tagName === 'STYLE' || node.tagName === 'LINK')) {
-                            // Another stylesheet was added — move ours to the end
-                            document.head.appendChild(style);
-                        }
-                    });
-                });
-            });
-
-            observer.observe(document.head, { childList: true });
-        })();
-
         // Initialize original stepper controls if present (backward compatibility)
         $(document).on('click', '.nuvho-stepper-btn', function() {
             var input = $(this).data('input');
@@ -150,152 +86,161 @@
             }
         });
         
-        // *** NEW GUEST SELECTOR FUNCTIONALITY ***
-        
-        // Elements
+        // *** GUEST SELECTOR FUNCTIONALITY ***
+
+        // Common elements
         const guestTrigger = $('.nuvho-guest-trigger');
         const guestModal = $('.nuvho-guest-modal');
         const cancelBtn = $('.nuvho-cancel-btn');
         const doneBtn = $('.nuvho-done-btn');
-        
-        // Counters and displays - FIXED CLASS NAMES
-        const adultCountDisplay = $('.nuvho-adults-number');
-        const kidsCountDisplay = $('.nuvho-kids-number');
         const adultCountSummary = $('.nuvho-adults-count');
         const kidsCountSummary = $('.nuvho-kids-count');
-        
-        // Hidden inputs
         const adultInput = $('#nuvho-adults-input');
         const kidsInput = $('#nuvho-kids-input');
-        
-        // State variables
-        let tempAdults = parseInt(adultInput.val()) || 2;
-        let tempKids = parseInt(kidsInput.val()) || 0;
-        let originalAdults, originalKids;
-        
-        // Open modal
-        guestTrigger.on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent the click from propagating to document
-            
-            // Store original values in case of cancel
-            originalAdults = tempAdults;
-            originalKids = tempKids;
-            
-            // Show the modal
-            guestModal.fadeIn(200);
-            
-            // Update displays in modal
-            updateDisplays();
-            checkButtonStates();
-        });
-        
-        // Close modal on Cancel button click
-        cancelBtn.on('click', function(e) {
-            e.preventDefault();
-            closeModalWithoutSaving();
-        });
-        
-        // Save values on Done button click
-        doneBtn.on('click', function(e) {
-            e.preventDefault();
-            
-            // Update hidden inputs
-            adultInput.val(tempAdults);
-            kidsInput.val(tempKids);
-            
-            // Update summary display
-            adultCountSummary.text(tempAdults);
-            kidsCountSummary.text(tempKids);
-            
-            // Close the modal
-            guestModal.fadeOut(200);
-        });
-        
-        // Close modal when clicking outside
-        $(document).on('click', function(e) {
-            if (guestModal.is(':visible') && 
-                !guestModal.is(e.target) && 
-                guestModal.has(e.target).length === 0 && 
-                !guestTrigger.is(e.target) && 
-                guestTrigger.has(e.target).length === 0) {
-                
+
+        // Detect which variant is active
+        const isDropdownMode = $('.nuvho-guest-modal-dropdown').length > 0;
+
+        if (isDropdownMode) {
+            // *** DROPDOWN MODE ***
+            const adultsDropdown = $('#nuvho-adults-dropdown');
+            const kidsDropdown = $('#nuvho-kids-dropdown');
+            let savedAdults, savedKids;
+
+            // Open modal
+            guestTrigger.on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Store current values for cancel
+                savedAdults = adultInput.val();
+                savedKids = kidsInput.val();
+                // Sync dropdowns with hidden inputs
+                adultsDropdown.val(savedAdults);
+                kidsDropdown.val(savedKids);
+                guestModal.fadeIn(200);
+            });
+
+            // Done — save dropdown values
+            doneBtn.on('click', function(e) {
+                e.preventDefault();
+                var adults = parseInt(adultsDropdown.val());
+                var kids = parseInt(kidsDropdown.val());
+                adultInput.val(adults);
+                kidsInput.val(kids);
+                adultCountSummary.text(adults);
+                kidsCountSummary.text(kids);
+                guestModal.fadeOut(200);
+            });
+
+            // Cancel — restore original values
+            cancelBtn.on('click', function(e) {
+                e.preventDefault();
+                adultsDropdown.val(savedAdults);
+                kidsDropdown.val(savedKids);
+                guestModal.fadeOut(200);
+            });
+
+            // Close on outside click
+            $(document).on('click', function(e) {
+                if (guestModal.is(':visible') &&
+                    !guestModal.is(e.target) &&
+                    guestModal.has(e.target).length === 0 &&
+                    !guestTrigger.is(e.target) &&
+                    guestTrigger.has(e.target).length === 0) {
+                    adultsDropdown.val(savedAdults);
+                    kidsDropdown.val(savedKids);
+                    guestModal.fadeOut(200);
+                }
+            });
+
+            guestModal.on('click', function(e) {
+                e.stopPropagation();
+            });
+        } else {
+            // *** STEPPER MODE (original) ***
+            const adultCountDisplay = $('.nuvho-adults-number');
+            const kidsCountDisplay = $('.nuvho-kids-number');
+            let tempAdults = parseInt(adultInput.val()) || 2;
+            let tempKids = parseInt(kidsInput.val()) || 0;
+            let originalAdults, originalKids;
+
+            guestTrigger.on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                originalAdults = tempAdults;
+                originalKids = tempKids;
+                guestModal.fadeIn(200);
+                updateDisplays();
+                checkButtonStates();
+            });
+
+            cancelBtn.on('click', function(e) {
+                e.preventDefault();
                 closeModalWithoutSaving();
-            }
-        });
-        
-        // Stop propagation for clicks inside the modal
-        guestModal.on('click', function(e) {
-            e.stopPropagation();
-        });
-        
-        // Increment/Decrement buttons
-        $('.nuvho-circle-btn').on('click', function() {
-            const target = $(this).data('target');
-            const isIncrease = $(this).hasClass('nuvho-increase');
-            
-            if (target === 'adults') {
-                if (isIncrease && tempAdults < 10) {
-                    tempAdults++;
-                } else if (!isIncrease && tempAdults > 1) {
-                    tempAdults--;
+            });
+
+            doneBtn.on('click', function(e) {
+                e.preventDefault();
+                adultInput.val(tempAdults);
+                kidsInput.val(tempKids);
+                adultCountSummary.text(tempAdults);
+                kidsCountSummary.text(tempKids);
+                guestModal.fadeOut(200);
+            });
+
+            $(document).on('click', function(e) {
+                if (guestModal.is(':visible') &&
+                    !guestModal.is(e.target) &&
+                    guestModal.has(e.target).length === 0 &&
+                    !guestTrigger.is(e.target) &&
+                    guestTrigger.has(e.target).length === 0) {
+                    closeModalWithoutSaving();
                 }
-            } else if (target === 'kids') {
-                if (isIncrease && tempKids < 10) {
-                    tempKids++;
-                } else if (!isIncrease && tempKids > 0) {
-                    tempKids--;
+            });
+
+            guestModal.on('click', function(e) {
+                e.stopPropagation();
+            });
+
+            $('.nuvho-circle-btn').on('click', function() {
+                const target = $(this).data('target');
+                const isIncrease = $(this).hasClass('nuvho-increase');
+                if (target === 'adults') {
+                    if (isIncrease && tempAdults < 10) tempAdults++;
+                    else if (!isIncrease && tempAdults > 1) tempAdults--;
+                } else if (target === 'kids') {
+                    if (isIncrease && tempKids < 10) tempKids++;
+                    else if (!isIncrease && tempKids > 0) tempKids--;
                 }
+                updateDisplays();
+                updateSummaryDisplay();
+                checkButtonStates();
+            });
+
+            function updateDisplays() {
+                adultCountDisplay.text(tempAdults);
+                kidsCountDisplay.text(tempKids);
             }
-            
-            // Update displays both in modal and in summary (real-time update)
-            updateDisplays();
-            updateSummaryDisplay();
-            checkButtonStates();
-        });
-        
-        // Helper functions
-        function updateDisplays() {
-            adultCountDisplay.text(tempAdults);
-            kidsCountDisplay.text(tempKids);
+            function updateSummaryDisplay() {
+                adultCountSummary.text(tempAdults);
+                kidsCountSummary.text(tempKids);
+            }
+            function checkButtonStates() {
+                $('.nuvho-decrease[data-target="adults"]').toggleClass('disabled', tempAdults <= 1);
+                $('.nuvho-increase[data-target="adults"]').toggleClass('disabled', tempAdults >= 10);
+                $('.nuvho-decrease[data-target="kids"]').toggleClass('disabled', tempKids <= 0);
+                $('.nuvho-increase[data-target="kids"]').toggleClass('disabled', tempKids >= 10);
+            }
+            function closeModalWithoutSaving() {
+                tempAdults = originalAdults;
+                tempKids = originalKids;
+                adultCountSummary.text(originalAdults);
+                kidsCountSummary.text(originalKids);
+                guestModal.fadeOut(200);
+            }
         }
-        
-        function updateSummaryDisplay() {
-            // Update the summary display in real-time
-            adultCountSummary.text(tempAdults);
-            kidsCountSummary.text(tempKids);
-        }
-        
-        function checkButtonStates() {
-            // Adults buttons
-            $('.nuvho-decrease[data-target="adults"]')
-                .toggleClass('disabled', tempAdults <= 1);
-                
-            $('.nuvho-increase[data-target="adults"]')
-                .toggleClass('disabled', tempAdults >= 10);
-                
-            // Kids buttons
-            $('.nuvho-decrease[data-target="kids"]')
-                .toggleClass('disabled', tempKids <= 0);
-                
-            $('.nuvho-increase[data-target="kids"]')
-                .toggleClass('disabled', tempKids >= 10);
-        }
-        
-        function closeModalWithoutSaving() {
-            // Reset to original values
-            tempAdults = originalAdults;
-            tempKids = originalKids;
-            
-            // Reset the summary display to original values
-            adultCountSummary.text(originalAdults);
-            kidsCountSummary.text(originalKids);
-            
-            // Close the modal
-            guestModal.fadeOut(200);
-        }
-        
-        // Initialize displays
+
+        // Initialize displays (both modes)
         adultCountSummary.text(adultInput.val() || '2');
         kidsCountSummary.text(kidsInput.val() || '0');
         

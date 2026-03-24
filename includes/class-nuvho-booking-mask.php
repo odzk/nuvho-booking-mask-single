@@ -161,6 +161,7 @@ class Nuvho_Booking_Mask {
 
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
+        $this->loader->add_action('wp_head', $plugin_public, 'inject_custom_css');
         $this->loader->add_shortcode('nuvho_booking_mask_single', $plugin_public, 'display_booking_mask');
     }
 
