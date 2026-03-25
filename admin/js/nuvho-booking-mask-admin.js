@@ -372,10 +372,14 @@
          * ------------------------------------------------------------------ */
         $('#nuvho-booking-option').on('change', function() {
             var e = $(this).val();
-            $('#hotel-id-label').text(e === 'SiteMinder' ? 'Property:' : 'Hotel ID:');
+            var idLabel = 'Hotel ID:';
+            if (e === 'SiteMinder') idLabel = 'Property:';
+            else if (e === 'GuestCentric') idLabel = 'API Key:';
+            else if (e === 'Clock PMS') idLabel = 'Hotel ID / Property ID:';
+            $('#hotel-id-label').text(idLabel);
             $('#accor-specific-settings, #simple-booking-specific-settings, #custom-engine-settings').hide();
             if (e === 'Accor') $('#accor-specific-settings').show();
-            if (e.includes('Simple Booking')) $('#simple-booking-specific-settings').show();
+            if (e.includes('Simple Booking') || e === 'Little Hotelier') $('#simple-booking-specific-settings').show();
             if (e === 'Custom') $('#custom-engine-settings').show();
 
             var defaults = {
@@ -387,7 +391,13 @@
                 'RMS':'https://rms.rezexchange.com/bookings',
                 'Protel':'https://booking.protel.net/booking',
                 'MEWS':'https://www.mewssystems.com/booking',
-                'TravelClick':'https://gc.synxis.com/rez.aspx'
+                'TravelClick':'https://gc.synxis.com/rez.aspx',
+                'GuestCentric':'https://secure.guestcentric.net/api/bg/book.php',
+                'Beds24':'https://www.beds24.com/booking2.php',
+                'Little Hotelier':'https://app.littlehotelier.com/properties/',
+                'Bookassist':'https://booking.bookassist.com/',
+                'Cubilis':'https://booking.cubilis.eu/',
+                'Clock PMS':'https://sky-eu1.clock-software.com/'
             };
             if (defaults[e]) {
                 $('input[name="nuvho_booking_mask_settings[url]"]').val(defaults[e]).attr('placeholder', '');

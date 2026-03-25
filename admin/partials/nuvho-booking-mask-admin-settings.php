@@ -113,6 +113,12 @@ $booking_providers = array(
     'Protel',
     'MEWS',
     'TravelClick',
+    'GuestCentric',
+    'Beds24',
+    'Little Hotelier',
+    'Bookassist',
+    'Cubilis',
+    'Clock PMS',
     'Custom'
 );
 
@@ -392,9 +398,9 @@ $opacity_options = array(
                     </table>
                 </div>
                 
-                <!-- Simple Booking specific settings -->
-                <div id="simple-booking-specific-settings" class="nuvho-settings-card" style="<?php echo (strpos($settings['option'], 'Simple Booking') !== false) ? 'display: block;' : 'display: none;'; ?>">
-                    <h2>Simple Booking Settings</h2>
+                <!-- Promo Code settings (Simple Booking & Little Hotelier) -->
+                <div id="simple-booking-specific-settings" class="nuvho-settings-card" style="<?php echo (strpos($settings['option'], 'Simple Booking') !== false || $settings['option'] === 'Little Hotelier') ? 'display: block;' : 'display: none;'; ?>">
+                    <h2>Promo Code Settings</h2>
                     <table class="form-table">
                         <tr>
                             <th scope="row">Show Promo Code Field:</th>

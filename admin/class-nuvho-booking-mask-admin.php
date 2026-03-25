@@ -103,8 +103,8 @@ class Nuvho_Booking_Mask_Admin {
             'ajax_url'       => admin_url('admin-ajax.php'),
             'nonce'          => wp_create_nonce('nuvho_custom_engine_nonce'),
             'region_engine_map' => array(
-                'europe'      => array('Simple Booking v2', 'Accor', 'Protel', 'MEWS'),
-                'asia_pacific' => array('Staah', 'SiteMinder', 'RMS'),
+                'europe'      => array('Simple Booking v2', 'Accor', 'Protel', 'MEWS', 'GuestCentric', 'Beds24', 'Bookassist', 'Cubilis', 'Clock PMS'),
+                'asia_pacific' => array('Staah', 'SiteMinder', 'RMS', 'Little Hotelier'),
                 'americas'    => array('Cloudbeds', 'TravelClick'),
             ),
         ));

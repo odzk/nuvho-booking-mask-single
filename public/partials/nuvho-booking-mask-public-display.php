@@ -187,7 +187,7 @@ $children = 0;
                 
                 <!-- 3. Promo code field - always in third position if enabled -->
                 <?php
-                $show_promo = isset($settings['show_promo_code']) && $settings['show_promo_code'] && (strpos($settings['option'], 'Simple Booking') !== false);
+                $show_promo = isset($settings['show_promo_code']) && $settings['show_promo_code'] && (strpos($settings['option'], 'Simple Booking') !== false || $settings['option'] === 'Little Hotelier');
                 if ($settings['option'] === 'Custom' && isset($settings['custom_has_promo']) && $settings['custom_has_promo']) {
                     $show_promo = true;
                 }

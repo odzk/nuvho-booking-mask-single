@@ -84,6 +84,9 @@ class Nuvho_Booking_Mask_Public {
 
         // Add the Custom engine URL override
         wp_enqueue_script($this->plugin_name . '-custom-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-custom-override.js', array('jquery', 'moment', $this->plugin_name), $this->version, false);
+
+        // Shared override for GuestCentric, Beds24, Little Hotelier, Bookassist, Cubilis, Clock PMS
+        wp_enqueue_script($this->plugin_name . '-engines-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-engines-override.js', array('jquery', 'moment', $this->plugin_name), $this->version, false);
         
         // Localize script with settings data
         $settings = get_option('nuvho_booking_mask_settings');
@@ -325,6 +328,16 @@ class Nuvho_Booking_Mask_Public {
             if (!empty($custom_config['hotel_id_in_path']) && !empty($settings['hotel_id'])) {
                 $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
             }
+        }
+
+        // For Little Hotelier, append hotel_id + 'direct' to path
+        if ($settings['option'] === 'Little Hotelier' && !empty($settings['hotel_id'])) {
+            $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'] . 'direct';
+        }
+
+        // For Clock PMS, append hotel_id (format: hotelId/propertyId) + /wbe/products/new
+        if ($settings['option'] === 'Clock PMS' && !empty($settings['hotel_id'])) {
+            $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'] . '/wbe/products/new';
         }
         
         // Start output buffering
