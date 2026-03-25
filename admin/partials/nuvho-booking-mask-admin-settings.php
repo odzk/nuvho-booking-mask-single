@@ -104,7 +104,6 @@ $theme_presets = array(
 
 // Booking providers
 $booking_providers = array(
-    'Simple Booking v1',
     'Simple Booking v2',
     'Accor',
     'Cloudbeds',
@@ -114,7 +113,7 @@ $booking_providers = array(
     'Protel',
     'MEWS',
     'TravelClick',
-    'Frome'
+    'Custom'
 );
 
 // Languages
@@ -333,7 +332,19 @@ $opacity_options = array(
                     <h2>Basic Settings</h2>
                     <table class="form-table">
                         <tr>
-                            <th scope="row">Option:</th>
+                            <th scope="row">Region:</th>
+                            <td>
+                                <select id="nuvho-region-filter">
+                                    <option value="all">All Regions</option>
+                                    <option value="europe">Europe</option>
+                                    <option value="asia_pacific">Asia-Pacific</option>
+                                    <option value="americas">Americas</option>
+                                </select>
+                                <p class="description">Filter booking engines by region.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Booking Engine:</th>
                             <td>
                                 <select name="nuvho_booking_mask_settings[option]" id="nuvho-booking-option">
                                     <?php foreach ($booking_providers as $provider) : ?>
@@ -467,8 +478,64 @@ $opacity_options = array(
                         </tr>
                     </table>
                 </div>
+
+                <!-- Custom Engine Settings -->
+                <div id="custom-engine-settings" class="nuvho-settings-card" style="<?php echo ($settings['option'] === 'Custom') ? 'display: block;' : 'display: none;'; ?>">
+                    <h2>Custom Booking Engine Settings</h2>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row">Anthropic API Key:</th>
+                            <td>
+                                <input type="password" name="nuvho_booking_mask_settings[anthropic_api_key]" value="<?php echo esc_attr(isset($settings['anthropic_api_key']) ? $settings['anthropic_api_key'] : ''); ?>" class="regular-text" autocomplete="off" />
+                                <p class="description">Required for auto-detecting booking engine parameters. <a href="https://console.anthropic.com/" target="_blank">Get API key</a></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Fetch Parameters:</th>
+                            <td>
+                                <button type="button" id="nuvho-fetch-params-btn" class="button button-secondary">Fetch Parameters</button>
+                                <span id="nuvho-fetch-status" style="margin-left:10px;"></span>
+                                <p class="description">Analyzes the URL above to detect booking engine parameters automatically.</p>
+                            </td>
+                        </tr>
+                        <tr id="nuvho-sample-url-row" style="display:none;">
+                            <th scope="row">Sample Booking URL:</th>
+                            <td>
+                                <input type="text" id="nuvho-sample-url" class="regular-text" placeholder="Paste a full booking URL with parameters" />
+                                <button type="button" id="nuvho-parse-sample-btn" class="button button-secondary">Parse URL</button>
+                                <p class="description">If the engine was not recognized, paste a complete booking URL with all query parameters filled in.</p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Parameter Editor (populated by AJAX response) -->
+                    <div id="nuvho-param-editor" style="display:none;">
+                        <h3>Detected Parameters</h3>
+                        <p id="nuvho-detected-engine-name" style="font-style:italic;"></p>
+                        <table class="widefat" id="nuvho-param-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter Name</th>
+                                    <th>Maps To</th>
+                                    <th>Format</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <p style="margin-top:10px;">
+                            <label>
+                                <input type="checkbox" id="nuvho-custom-has-promo" name="nuvho_booking_mask_settings[custom_has_promo]" value="1" <?php checked(isset($settings['custom_has_promo']) && $settings['custom_has_promo']); ?> />
+                                Engine supports promo/coupon codes
+                            </label>
+                        </p>
+                    </div>
+
+                    <!-- Hidden field storing serialized custom config as JSON -->
+                    <input type="hidden" name="nuvho_booking_mask_settings[custom_engine_config]" id="nuvho-custom-engine-config" value="<?php echo esc_attr(isset($settings['custom_engine_config']) ? $settings['custom_engine_config'] : ''); ?>" />
+                </div>
             </div>
-            
+
             <div class="nuvho-admin-column">
                 <div class="nuvho-settings-card">
                     <h2>Appearance Settings</h2>

@@ -59,19 +59,15 @@ $children = 0;
                 <?php if (!empty($settings['contextparam'])) : ?>
                     <input type="hidden" name="contextparam" value="<?php echo esc_attr($settings['contextparam']); ?>">
                 <?php endif; ?>
-            <?php elseif ($settings['option'] === 'Simple Booking v1') : ?>
-                <input type="hidden" name="hid" value="<?php echo esc_attr($settings['hotel_id']); ?>">
-                <input type="hidden" name="lang" value="<?php echo esc_attr(strtoupper(substr(explode(' ', $settings['language'])[0], 0, 2))); ?>">
-                <input type="hidden" name="cur" value="<?php echo esc_attr($settings['currency']); ?>">
-                <?php if (!empty($settings['coupon']) && empty($settings['show_promo_code'])) : ?>
-                    <input type="hidden" name="coupon" value="<?php echo esc_attr($settings['coupon']); ?>">
-                <?php endif; ?>
             <?php elseif ($settings['option'] === 'Simple Booking v2') : ?>
                 <input type="hidden" name="lang" value="<?php echo esc_attr(strtoupper(substr(explode(' ', $settings['language'])[0], 0, 2))); ?>">
                 <input type="hidden" name="cur" value="<?php echo esc_attr($settings['currency']); ?>">
                 <?php if (!empty($settings['coupon']) && empty($settings['show_promo_code'])) : ?>
                     <input type="hidden" name="coupon" value="<?php echo esc_attr($settings['coupon']); ?>">
                 <?php endif; ?>
+            <?php elseif ($settings['option'] === 'Custom') : ?>
+                <!-- Custom engine: URL is built entirely by JS override -->
+                <input type="hidden" name="hotel_id" value="<?php echo esc_attr($settings['hotel_id']); ?>">
             <?php else : ?>
                 <input type="hidden" name="hotel_id" value="<?php echo esc_attr($settings['hotel_id']); ?>">
                 <input type="hidden" name="lang" value="<?php echo esc_attr(strtolower(explode(' ', $settings['language'])[0])); ?>">
@@ -190,7 +186,13 @@ $children = 0;
                 </div>
                 
                 <!-- 3. Promo code field - always in third position if enabled -->
-                <?php if (isset($settings['show_promo_code']) && $settings['show_promo_code'] && (strpos($settings['option'], 'Simple Booking') !== false)) : ?>
+                <?php
+                $show_promo = isset($settings['show_promo_code']) && $settings['show_promo_code'] && (strpos($settings['option'], 'Simple Booking') !== false);
+                if ($settings['option'] === 'Custom' && isset($settings['custom_has_promo']) && $settings['custom_has_promo']) {
+                    $show_promo = true;
+                }
+                ?>
+                <?php if ($show_promo) : ?>
                 <div class="nuvho-form-field nuvho-promo-field">
                     <label for="nuvho-promo"><?php esc_html_e('Promo Code', 'nuvho-booking-mask'); ?></label>
                     <input type="text" id="nuvho-promo" name="coupon" placeholder="<?php esc_attr_e('Enter promo code', 'nuvho-booking-mask'); ?>">

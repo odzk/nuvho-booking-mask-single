@@ -81,6 +81,9 @@ class Nuvho_Booking_Mask_Public {
         
         // Add booking engine specific handlers
         wp_enqueue_script($this->plugin_name . '-site-minder', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/site_minder.js', array('jquery', $this->plugin_name), $this->version, false);
+
+        // Add the Custom engine URL override
+        wp_enqueue_script($this->plugin_name . '-custom-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-custom-override.js', array('jquery', 'moment', $this->plugin_name), $this->version, false);
         
         // Localize script with settings data
         $settings = get_option('nuvho_booking_mask_settings');
@@ -314,6 +317,14 @@ class Nuvho_Booking_Mask_Public {
         // For SiteMinder, append the hotel_id to the URL
         if ($settings['option'] === 'SiteMinder') {
             $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
+        }
+
+        // For Custom engine, append hotel_id to path if configured
+        if ($settings['option'] === 'Custom' && !empty($settings['custom_engine_config'])) {
+            $custom_config = json_decode($settings['custom_engine_config'], true);
+            if (!empty($custom_config['hotel_id_in_path']) && !empty($settings['hotel_id'])) {
+                $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
+            }
         }
         
         // Start output buffering

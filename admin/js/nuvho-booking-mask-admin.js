@@ -373,13 +373,13 @@
         $('#nuvho-booking-option').on('change', function() {
             var e = $(this).val();
             $('#hotel-id-label').text(e === 'SiteMinder' ? 'Property:' : 'Hotel ID:');
-            $('#accor-specific-settings, #simple-booking-specific-settings').hide();
+            $('#accor-specific-settings, #simple-booking-specific-settings, #custom-engine-settings').hide();
             if (e === 'Accor') $('#accor-specific-settings').show();
             if (e.includes('Simple Booking')) $('#simple-booking-specific-settings').show();
+            if (e === 'Custom') $('#custom-engine-settings').show();
 
             var defaults = {
                 'Accor':'https://all.accor.com/ssr/app/accor/rates',
-                'Simple Booking v1':'https://www.simplebooking.it/ibe/search',
                 'Simple Booking v2':'https://www.simplebooking.it/ibe2/hotel',
                 'Cloudbeds':'https://hotels.cloudbeds.com/reservation/',
                 'Staah':'https://secure.staah.com/common-cgi/package/packagebooking.pl',
@@ -387,11 +387,55 @@
                 'RMS':'https://rms.rezexchange.com/bookings',
                 'Protel':'https://booking.protel.net/booking',
                 'MEWS':'https://www.mewssystems.com/booking',
-                'TravelClick':'https://gc.synxis.com/rez.aspx',
-                'Frome':'https://frome.bookings.com/reservation'
+                'TravelClick':'https://gc.synxis.com/rez.aspx'
             };
-            if (defaults[e]) $('input[name="nuvho_booking_mask_settings[url]"]').val(defaults[e]);
+            if (defaults[e]) {
+                $('input[name="nuvho_booking_mask_settings[url]"]').val(defaults[e]).attr('placeholder', '');
+            } else if (e === 'Custom') {
+                $('input[name="nuvho_booking_mask_settings[url]"]').val('').attr('placeholder', 'Enter your custom booking URL');
+            }
         }).trigger('change');
+
+        /* ------------------------------------------------------------------
+         *  8a. Region filter – filter booking engine dropdown by region
+         * ------------------------------------------------------------------ */
+        var regionMap = (typeof nuvhoAdminData !== 'undefined' && nuvhoAdminData.region_engine_map) ? nuvhoAdminData.region_engine_map : {};
+
+        $('#nuvho-region-filter').on('change', function() {
+            var region = $(this).val();
+            var $engineSelect = $('#nuvho-booking-option');
+
+            $engineSelect.find('option').each(function() {
+                var engine = $(this).val();
+                // Custom is always visible
+                if (engine === 'Custom') {
+                    $(this).show();
+                    return;
+                }
+                if (region === 'all' || !regionMap[region]) {
+                    $(this).show();
+                } else {
+                    var visible = regionMap[region].indexOf(engine) !== -1;
+                    if (visible) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                }
+            });
+
+            // If currently selected engine is now hidden, reset to first visible
+            var $selected = $engineSelect.find('option:selected');
+            if ($selected.css('display') === 'none' || $selected.is(':hidden')) {
+                $engineSelect.find('option').each(function() {
+                    if ($(this).css('display') !== 'none') {
+                        $(this).prop('selected', true);
+                        $engineSelect.trigger('change');
+                        return false;
+                    }
+                });
+            }
+        });
 
         /* ------------------------------------------------------------------
          *  8b. Guest Selection Type toggle (stepper ↔ dropdown preview)
@@ -480,7 +524,182 @@
         });
 
         /* ------------------------------------------------------------------
-         *  11. Page-load initialisation
+         *  11. Custom Engine – Fetch & Parse Parameters via Claude API
+         * ------------------------------------------------------------------ */
+        var valueSources = [
+            'checkin', 'checkout', 'adults', 'children', 'rooms',
+            'promo', 'hotel_id', 'language', 'currency', 'custom', 'static'
+        ];
+
+        function escHtml(str) {
+            return $('<div>').text(str || '').html();
+        }
+
+        function populateParamEditor(data) {
+            var $editor = $('#nuvho-param-editor');
+            var $tbody  = $('#nuvho-param-table tbody');
+            $tbody.empty();
+
+            if (data.engine_name) {
+                $('#nuvho-detected-engine-name').text('Detected engine: ' + data.engine_name);
+            } else {
+                $('#nuvho-detected-engine-name').text('');
+            }
+
+            if (data.parameters && data.parameters.length) {
+                data.parameters.forEach(function(param) {
+                    var sourceOptions = valueSources.map(function(src) {
+                        var selected = (src === param.value_source) ? ' selected' : '';
+                        return '<option value="' + src + '"' + selected + '>' + src + '</option>';
+                    }).join('');
+
+                    var row = '<tr>' +
+                        '<td><input type="text" class="param-name" value="' + escHtml(param.name) + '" style="width:100%;" /></td>' +
+                        '<td><select class="param-source">' + sourceOptions + '</select></td>' +
+                        '<td><input type="text" class="param-format" value="' + escHtml(param.format || '') + '" placeholder="e.g. YYYY-MM-DD" style="width:100%;" /></td>' +
+                        '<td><input type="text" class="param-desc" value="' + escHtml(param.description || '') + '" style="width:100%;" /></td>' +
+                        '</tr>';
+                    $tbody.append(row);
+                });
+            }
+
+            if (data.has_promo) {
+                $('#nuvho-custom-has-promo').prop('checked', true);
+            }
+
+            updateCustomEngineConfig(data);
+            $editor.show();
+        }
+
+        function updateCustomEngineConfig(data) {
+            var config = {
+                engine_name: data.engine_name || 'Custom',
+                base_url_pattern: data.base_url_pattern || '',
+                method: data.method || 'GET',
+                hotel_id_in_path: data.hotel_id_in_path || false,
+                hotel_id_path_position: data.hotel_id_path_position || '',
+                has_promo: $('#nuvho-custom-has-promo').is(':checked'),
+                parameters: []
+            };
+
+            $('#nuvho-param-table tbody tr').each(function() {
+                config.parameters.push({
+                    name: $(this).find('.param-name').val(),
+                    value_source: $(this).find('.param-source').val(),
+                    format: $(this).find('.param-format').val(),
+                    description: $(this).find('.param-desc').val()
+                });
+            });
+
+            $('#nuvho-custom-engine-config').val(JSON.stringify(config));
+        }
+
+        // Update hidden config whenever editor fields change
+        $(document).on('change input', '#nuvho-param-table input, #nuvho-param-table select, #nuvho-custom-has-promo', function() {
+            var existingConfig = {};
+            try {
+                existingConfig = JSON.parse($('#nuvho-custom-engine-config').val() || '{}');
+            } catch(e) { /* ignore */ }
+            updateCustomEngineConfig(existingConfig);
+        });
+
+        // Fetch Parameters button
+        $('#nuvho-fetch-params-btn').on('click', function() {
+            var url = $('input[name="nuvho_booking_mask_settings[url]"]').val();
+            if (!url) {
+                alert('Please enter a booking engine URL first.');
+                return;
+            }
+
+            var $btn    = $(this);
+            var $status = $('#nuvho-fetch-status');
+            $btn.prop('disabled', true);
+            $status.text('Analyzing URL...').css('color', '#666');
+
+            $.ajax({
+                url: nuvhoAdminData.ajax_url,
+                method: 'POST',
+                data: {
+                    action: 'nuvho_fetch_engine_params',
+                    nonce:  nuvhoAdminData.nonce,
+                    url:    url,
+                    mode:   'identify'
+                },
+                success: function(response) {
+                    $btn.prop('disabled', false);
+                    if (response.success) {
+                        if (response.data.identified) {
+                            $status.text('Engine identified: ' + response.data.engine_name).css('color', 'green');
+                            populateParamEditor(response.data);
+                        } else {
+                            $status.text('Engine not recognized. Please provide a sample booking URL below.').css('color', 'orange');
+                            $('#nuvho-sample-url-row').show();
+                        }
+                    } else {
+                        $status.text('Error: ' + response.data.message).css('color', 'red');
+                    }
+                },
+                error: function() {
+                    $btn.prop('disabled', false);
+                    $status.text('Request failed. Check your API key and try again.').css('color', 'red');
+                }
+            });
+        });
+
+        // Parse Sample URL button
+        $('#nuvho-parse-sample-btn').on('click', function() {
+            var baseUrl   = $('input[name="nuvho_booking_mask_settings[url]"]').val();
+            var sampleUrl = $('#nuvho-sample-url').val();
+            if (!sampleUrl) {
+                alert('Please paste a full sample booking URL with parameters.');
+                return;
+            }
+
+            var $status = $('#nuvho-fetch-status');
+            $status.text('Parsing sample URL...').css('color', '#666');
+            $('#nuvho-parse-sample-btn').prop('disabled', true);
+
+            $.ajax({
+                url: nuvhoAdminData.ajax_url,
+                method: 'POST',
+                data: {
+                    action:     'nuvho_fetch_engine_params',
+                    nonce:      nuvhoAdminData.nonce,
+                    url:        baseUrl,
+                    sample_url: sampleUrl,
+                    mode:       'parse'
+                },
+                success: function(response) {
+                    $('#nuvho-parse-sample-btn').prop('disabled', false);
+                    if (response.success) {
+                        $status.text('Parameters parsed successfully.').css('color', 'green');
+                        populateParamEditor(response.data);
+                    } else {
+                        $status.text('Error: ' + response.data.message).css('color', 'red');
+                    }
+                },
+                error: function() {
+                    $('#nuvho-parse-sample-btn').prop('disabled', false);
+                    $status.text('Request failed. Check your API key and try again.').css('color', 'red');
+                }
+            });
+        });
+
+        // On page load, if Custom is selected and config exists, restore the editor
+        (function() {
+            var configVal = $('#nuvho-custom-engine-config').val();
+            if ($('#nuvho-booking-option').val() === 'Custom' && configVal) {
+                try {
+                    var config = JSON.parse(configVal);
+                    if (config.parameters && config.parameters.length) {
+                        populateParamEditor(config);
+                    }
+                } catch(e) { /* ignore */ }
+            }
+        })();
+
+        /* ------------------------------------------------------------------
+         *  12. Page-load initialisation
          * ------------------------------------------------------------------ */
         if ($('#nuvho-show-css-toggle').is(':checked')) {
             var ta = document.getElementById('nuvho-custom-css');

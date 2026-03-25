@@ -49,6 +49,25 @@ class Nuvho_Booking_Mask_Admin {
     public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
+
+        // Migrate deprecated booking engine selections
+        $settings = get_option('nuvho_booking_mask_settings');
+        if (!empty($settings)) {
+            $updated = false;
+            if ($settings['option'] === 'Simple Booking v1') {
+                $settings['option'] = 'Simple Booking v2';
+                $settings['url'] = 'https://www.simplebooking.it/ibe2/hotel';
+                $updated = true;
+            }
+            if ($settings['option'] === 'Frome') {
+                $settings['option'] = 'Simple Booking v2';
+                $settings['url'] = 'https://www.simplebooking.it/ibe2/hotel';
+                $updated = true;
+            }
+            if ($updated) {
+                update_option('nuvho_booking_mask_settings', $settings);
+            }
+        }
     }
 
     /**
@@ -81,6 +100,13 @@ class Nuvho_Booking_Mask_Admin {
         wp_enqueue_script($this->plugin_name, NUVHO_BOOKING_MASK_PLUGIN_URL . 'admin/js/nuvho-booking-mask-admin.js', array('jquery', 'wp-color-picker'), $this->version, false);
         wp_localize_script($this->plugin_name, 'nuvhoAdminData', array(
             'public_css_url' => NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/css/nuvho-booking-mask-public.css',
+            'ajax_url'       => admin_url('admin-ajax.php'),
+            'nonce'          => wp_create_nonce('nuvho_custom_engine_nonce'),
+            'region_engine_map' => array(
+                'europe'      => array('Simple Booking v2', 'Accor', 'Protel', 'MEWS'),
+                'asia_pacific' => array('Staah', 'SiteMinder', 'RMS'),
+                'americas'    => array('Cloudbeds', 'TravelClick'),
+            ),
         ));
 
         // Load the exact same assets the public mask uses
@@ -328,5 +354,175 @@ class Nuvho_Booking_Mask_Admin {
         
         fclose($output);
         exit;
+    }
+
+    /**
+     * AJAX handler: Fetch engine parameters via Claude API
+     */
+    public function ajax_fetch_engine_params() {
+        check_ajax_referer('nuvho_custom_engine_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Insufficient permissions.'));
+        }
+
+        $settings = get_option('nuvho_booking_mask_settings');
+        $api_key = isset($settings['anthropic_api_key']) ? $settings['anthropic_api_key'] : '';
+
+        if (empty($api_key)) {
+            wp_send_json_error(array('message' => 'Anthropic API key not configured. Please save your API key first.'));
+        }
+
+        $url = sanitize_url(wp_unslash($_POST['url']));
+        $mode = sanitize_text_field(wp_unslash($_POST['mode']));
+        $sample_url = isset($_POST['sample_url']) ? sanitize_url(wp_unslash($_POST['sample_url'])) : '';
+
+        if (empty($url)) {
+            wp_send_json_error(array('message' => 'URL is required.'));
+        }
+
+        $system_prompt = $this->get_claude_system_prompt();
+
+        if ($mode === 'identify') {
+            $user_message = 'Identify the hotel booking engine from this base URL and return its parameter structure: ' . $url;
+        } else {
+            $user_message = "Base URL: " . $url . "\nSample booking URL with parameters: " . $sample_url . "\nParse the sample URL and extract all query parameters, mapping them to their booking function.";
+        }
+
+        $result = $this->call_claude_api($api_key, $system_prompt, $user_message);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(array('message' => $result->get_error_message()));
+        }
+
+        wp_send_json_success($result);
+    }
+
+    /**
+     * Call the Anthropic Claude API
+     */
+    private function call_claude_api($api_key, $system_prompt, $user_message) {
+        $response = wp_remote_post('https://api.anthropic.com/v1/messages', array(
+            'timeout' => 30,
+            'headers' => array(
+                'Content-Type'      => 'application/json',
+                'x-api-key'         => $api_key,
+                'anthropic-version' => '2023-06-01',
+            ),
+            'body' => wp_json_encode(array(
+                'model'      => 'claude-sonnet-4-20250514',
+                'max_tokens' => 2048,
+                'system'     => $system_prompt,
+                'messages'   => array(
+                    array('role' => 'user', 'content' => $user_message)
+                ),
+            )),
+        ));
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if ($status_code !== 200) {
+            $error_msg = isset($data['error']['message']) ? $data['error']['message'] : 'API request failed (HTTP ' . $status_code . ')';
+            return new WP_Error('api_error', $error_msg);
+        }
+
+        // Extract text content from Claude response
+        $text = '';
+        if (isset($data['content'])) {
+            foreach ($data['content'] as $block) {
+                if ($block['type'] === 'text') {
+                    $text .= $block['text'];
+                }
+            }
+        }
+
+        // Parse JSON from Claude's response (strip code fences if present)
+        $text = trim($text);
+        if (preg_match('/```(?:json)?\s*([\s\S]*?)```/', $text, $matches)) {
+            $text = trim($matches[1]);
+        }
+
+        $parsed = json_decode($text, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return new WP_Error('parse_error', 'Failed to parse API response as JSON. Raw response: ' . substr($text, 0, 500));
+        }
+
+        return $parsed;
+    }
+
+    /**
+     * Get the system prompt for Claude API
+     */
+    private function get_claude_system_prompt() {
+        return 'You are a hotel booking engine URL parameter expert. Your task is to identify hotel booking engines from URLs and return their complete URL parameter structure as JSON.
+
+IMPORTANT: Return ONLY valid JSON. No markdown formatting, no explanation text, no code fences. Output raw JSON only.
+
+When given a base URL (identify mode):
+1. Analyze the domain and URL path to identify the booking engine provider
+2. If recognized, set "identified": true and provide the complete parameter structure from your knowledge
+3. If not recognized, set "identified": false with an empty parameters array
+
+When given a base URL + sample booking URL (parse mode):
+1. Parse all query string parameters from the sample URL
+2. Analyze parameter names and their values to determine what each represents
+3. Map each parameter to its booking function (check-in date, adults count, etc.)
+4. Always set "identified": true since you have concrete data to work with
+
+Required JSON output structure:
+{
+    "identified": true or false,
+    "engine_name": "Name of the booking engine, or \'Unknown\'",
+    "base_url_pattern": "The base URL without query parameters or dynamic path segments",
+    "method": "GET or POST",
+    "hotel_id_in_path": true or false,
+    "hotel_id_path_position": "Description of where hotel ID appears in URL path, e.g. \'appended as last path segment\' or \'\' if not in path",
+    "has_promo": true or false,
+    "parameters": [
+        {
+            "name": "the exact query parameter name as it appears in the URL",
+            "value_source": "one of the allowed source values (see below)",
+            "format": "precise format description (see examples below)",
+            "description": "human-readable explanation of what this parameter does",
+            "default_value": "default or static value if applicable, otherwise empty string",
+            "required": true or false
+        }
+    ]
+}
+
+Allowed value_source values:
+- "checkin" — Maps to the user\'s selected check-in date
+- "checkout" — Maps to the user\'s selected check-out date
+- "adults" — Maps to the number of adults selected by the user
+- "children" — Maps to the number of children selected by the user
+- "rooms" — Maps to the number of rooms (typically defaults to 1)
+- "promo" — Maps to the promotional/coupon code input field
+- "hotel_id" — Maps to the configured hotel or property identifier
+- "language" — Maps to the configured display language
+- "currency" — Maps to the configured currency
+- "static" — A fixed value that never changes (provide the value in default_value)
+- "custom" — A value the hotel administrator needs to configure manually
+
+Format description examples (be this precise):
+- Dates: "YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY", "YYYYMMDD", "DD-MM-YYYY"
+- Guest counts: "integer" (just the number, e.g. "3"), "repeated-letter:A" (e.g. 3 adults = "A,A,A")
+- Language: "ISO 639-1 lowercase" (en, fr, de), "ISO 639-1 uppercase" (EN, FR, DE), "full lowercase" (english, french)
+- Currency: "ISO 4217 uppercase" (USD, EUR), "ISO 4217 lowercase" (usd, eur)
+- Boolean: "1 or 0", "true or false", "yes or no"
+- String: "freetext"
+
+Guidelines:
+- Include ALL known parameters for the identified engine, including optional ones
+- Mark each parameter as required or optional
+- If a parameter has a known default or static value, include it
+- For engines you recognize, draw on your complete knowledge of their booking URL structure
+- For parsed sample URLs, infer the value_source from the parameter name and its value
+- Be comprehensive — it is better to include an extra parameter than to miss one';
     }
 }
