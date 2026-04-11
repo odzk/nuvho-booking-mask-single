@@ -81,6 +81,12 @@ class Nuvho_Booking_Mask_Public {
         
         // Add booking engine specific handlers
         wp_enqueue_script($this->plugin_name . '-site-minder', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/site_minder.js', array('jquery', $this->plugin_name), $this->version, false);
+
+        // Add the Custom engine URL override
+        wp_enqueue_script($this->plugin_name . '-custom-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-custom-override.js', array('jquery', 'moment', $this->plugin_name), $this->version, false);
+
+        // Shared override for GuestCentric, Beds24, Little Hotelier, Bookassist, Cubilis, Clock PMS
+        wp_enqueue_script($this->plugin_name . '-engines-override', NUVHO_BOOKING_MASK_PLUGIN_URL . 'public/js/nuvho-booking-mask-public-engines-override.js', array('jquery', 'moment', $this->plugin_name), $this->version, false);
         
         // Localize script with settings data
         $settings = get_option('nuvho_booking_mask_settings');
@@ -222,6 +228,44 @@ class Nuvho_Booking_Mask_Public {
     }
 
     /**
+     * Inject dynamic CSS into wp_head based on plugin settings.
+     */
+    public function inject_custom_css() {
+        $settings = get_option('nuvho_booking_mask_settings');
+        if (empty($settings) || !is_array($settings)) {
+            return;
+        }
+
+        $bg_color   = isset($settings['background_color']) ? esc_attr($settings['background_color']) : '#4c7380';
+        $opacity    = isset($settings['background_opacity']) ? str_replace('%', '', $settings['background_opacity']) / 100 : 1;
+        $font_color = isset($settings['font_color']) ? esc_attr($settings['font_color']) : '#ffffff';
+        $btn_color  = isset($settings['button_color']) ? esc_attr($settings['button_color']) : '#4c7380';
+        $btn_text   = isset($settings['button_text_color']) ? esc_attr($settings['button_text_color']) : '#ffffff';
+        $rgba       = self::convert_color_to_rgba($bg_color, $opacity);
+
+        $border_radius = '0';
+        if (isset($settings['booking_mask_border_radius'])) {
+            if ($settings['booking_mask_border_radius'] === 'Rounded') {
+                $border_radius = '8px';
+            } elseif ($settings['booking_mask_border_radius'] === 'Pill') {
+                $border_radius = '20px';
+            }
+        }
+
+        echo '<style type="text/css">'
+            . '.nuvho-booking-mask-container{'
+            . 'background-color:' . $rgba . ';'
+            . 'border-radius:' . $border_radius . ';'
+            . '}'
+            . '.nuvho-booking-form{color:' . $font_color . ';}'
+            . '.nuvho-booking-form .nuvho-submit-field button{'
+            . 'background-color:' . $btn_color . ';'
+            . 'color:' . $btn_text . ';'
+            . '}'
+            . '</style>' . "\n";
+    }
+
+    /**
      * Booking mask shortcode callback
      */
     public function display_booking_mask($atts) {
@@ -314,6 +358,24 @@ class Nuvho_Booking_Mask_Public {
         // For SiteMinder, append the hotel_id to the URL
         if ($settings['option'] === 'SiteMinder') {
             $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
+        }
+
+        // For Custom engine, append hotel_id to path if configured
+        if ($settings['option'] === 'Custom' && !empty($settings['custom_engine_config'])) {
+            $custom_config = json_decode($settings['custom_engine_config'], true);
+            if (!empty($custom_config['hotel_id_in_path']) && !empty($settings['hotel_id'])) {
+                $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'];
+            }
+        }
+
+        // For Little Hotelier, append hotel_id + 'direct' to path
+        if ($settings['option'] === 'Little Hotelier' && !empty($settings['hotel_id'])) {
+            $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'] . 'direct';
+        }
+
+        // For Clock PMS, append hotel_id (format: hotelId/propertyId) + /wbe/products/new
+        if ($settings['option'] === 'Clock PMS' && !empty($settings['hotel_id'])) {
+            $settings['url'] = trailingslashit($settings['url']) . $settings['hotel_id'] . '/wbe/products/new';
         }
         
         // Start output buffering

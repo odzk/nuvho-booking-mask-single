@@ -29,8 +29,8 @@ class Nuvho_Booking_Mask_Activator {
     public static function activate() {
         // Initialize default settings
         $default_settings = array(
-            'option' => 'Simple Booking v1',
-            'url' => 'https://www.simplebooking.it/ibe/search',
+            'option' => 'Simple Booking v2',
+            'url' => 'https://www.simplebooking.it/ibe2/hotel',
             'language' => 'English (US)',
             'currency' => 'AUD',
             'hotel_id' => '6886',
