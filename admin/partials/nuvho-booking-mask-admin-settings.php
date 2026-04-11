@@ -690,16 +690,35 @@ $opacity_options = array(
         <div class="nuvho-shortcode-info">
             <h3>Shortcode</h3>
             <p>Use this shortcode to display the booking mask on any page or post:</p>
-            <code>[nuvho_booking_mask_single]</code>
+            <div class="nuvho-shortcode-row">
+                <code id="nuvho-shortcode-text">[nuvho_booking_mask_single]</code>
+                <button type="button" id="nuvho-copy-shortcode" class="button"><?php esc_html_e('Copy to clipboard', 'nuvho-booking-mask'); ?></button>
+            </div>
         </div>
     </form>
 </div>
 
 <script>
 jQuery(document).ready(function($) {
+    // Copy shortcode to clipboard
+    $('#nuvho-copy-shortcode').on('click', function() {
+        var shortcode = $('#nuvho-shortcode-text').text();
+        navigator.clipboard.writeText(shortcode).then(function() {
+            var $btn = $('#nuvho-copy-shortcode');
+            var original = $btn.text();
+            $btn.text('Copied!');
+            setTimeout(function() { $btn.text(original); }, 2000);
+        });
+    });
+
     // Add theme selection styling
     $('<style>')
         .text(`
+            #nuvho-copy-shortcode {
+                margin-top: 10px;
+                margin-left: 10px;
+            }
+                
             #nuvho-theme-selector {
                 min-width: 200px;
                 padding: 8px 12px;

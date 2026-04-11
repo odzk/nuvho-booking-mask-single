@@ -228,6 +228,44 @@ class Nuvho_Booking_Mask_Public {
     }
 
     /**
+     * Inject dynamic CSS into wp_head based on plugin settings.
+     */
+    public function inject_custom_css() {
+        $settings = get_option('nuvho_booking_mask_settings');
+        if (empty($settings) || !is_array($settings)) {
+            return;
+        }
+
+        $bg_color   = isset($settings['background_color']) ? esc_attr($settings['background_color']) : '#4c7380';
+        $opacity    = isset($settings['background_opacity']) ? str_replace('%', '', $settings['background_opacity']) / 100 : 1;
+        $font_color = isset($settings['font_color']) ? esc_attr($settings['font_color']) : '#ffffff';
+        $btn_color  = isset($settings['button_color']) ? esc_attr($settings['button_color']) : '#4c7380';
+        $btn_text   = isset($settings['button_text_color']) ? esc_attr($settings['button_text_color']) : '#ffffff';
+        $rgba       = self::convert_color_to_rgba($bg_color, $opacity);
+
+        $border_radius = '0';
+        if (isset($settings['booking_mask_border_radius'])) {
+            if ($settings['booking_mask_border_radius'] === 'Rounded') {
+                $border_radius = '8px';
+            } elseif ($settings['booking_mask_border_radius'] === 'Pill') {
+                $border_radius = '20px';
+            }
+        }
+
+        echo '<style type="text/css">'
+            . '.nuvho-booking-mask-container{'
+            . 'background-color:' . $rgba . ';'
+            . 'border-radius:' . $border_radius . ';'
+            . '}'
+            . '.nuvho-booking-form{color:' . $font_color . ';}'
+            . '.nuvho-booking-form .nuvho-submit-field button{'
+            . 'background-color:' . $btn_color . ';'
+            . 'color:' . $btn_text . ';'
+            . '}'
+            . '</style>' . "\n";
+    }
+
+    /**
      * Booking mask shortcode callback
      */
     public function display_booking_mask($atts) {

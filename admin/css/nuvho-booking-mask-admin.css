@@ -112,13 +112,21 @@
     margin-right: auto;
 }
 
+.nuvho-shortcode-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
 .nuvho-shortcode-info code {
     display: inline-block;
     padding: 8px 12px;
     background: #f0f0f1;
     border: 1px solid #ddd;
     border-radius: 4px;
-    margin: 8px 0;
+    margin: 0;
     font-family: Consolas, Monaco, monospace;
     font-size: 14px;
 }
