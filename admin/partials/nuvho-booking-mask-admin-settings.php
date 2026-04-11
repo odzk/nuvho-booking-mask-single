@@ -715,10 +715,9 @@ jQuery(document).ready(function($) {
     $('<style>')
         .text(`
             #nuvho-copy-shortcode {
-                margin-top: 10px;
                 margin-left: 10px;
             }
-                
+
             #nuvho-theme-selector {
                 min-width: 200px;
                 padding: 8px 12px;
