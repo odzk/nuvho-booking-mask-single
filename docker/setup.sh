@@ -1,6 +1,6 @@
 #!/bin/sh
 # WP-CLI auto-setup script
-# Runs once inside the wpcli container on first launch
+# Runs inside the wpcli container on launch
 
 set -e
 
@@ -10,6 +10,7 @@ WP_ADMIN_USER="nuvho"
 WP_ADMIN_PASS="Hoteliers.200677!"
 WP_ADMIN_EMAIL="admin@nuvho.test"
 PLUGIN_SLUG="nuvho-booking-mask-single"
+PLUGIN_DIR="/var/www/html/wp-content/plugins/$PLUGIN_SLUG"
 
 # ---- Wait for WordPress container to write wp-config.php ----
 echo "[setup] Waiting for wp-config.php..."
@@ -35,51 +36,45 @@ until wp db check --quiet 2>/dev/null; do
   fi
 done
 
-# ---- Skip if already installed ----
-if wp core is-installed 2>/dev/null; then
-  echo "[setup] WordPress already installed — skipping."
-  exit 0
+# ---- Install WordPress core (skips if already installed) ----
+if ! wp core is-installed 2>/dev/null; then
+  echo "[setup] Installing WordPress..."
+  wp core install \
+    --url="$WP_URL" \
+    --title="$WP_TITLE" \
+    --admin_user="$WP_ADMIN_USER" \
+    --admin_password="$WP_ADMIN_PASS" \
+    --admin_email="$WP_ADMIN_EMAIL" \
+    --skip-email
+else
+  echo "[setup] WordPress already installed, skipping core install."
 fi
 
-# ---- Install WordPress core ----
-echo "[setup] Installing WordPress..."
-wp core install \
-  --url="$WP_URL" \
-  --title="$WP_TITLE" \
-  --admin_user="$WP_ADMIN_USER" \
-  --admin_password="$WP_ADMIN_PASS" \
-  --admin_email="$WP_ADMIN_EMAIL" \
-  --skip-email
-
-# ---- Clone plugin from GitHub ----
-PLUGIN_DIR="/var/www/html/wp-content/plugins/$PLUGIN_SLUG"
-if [ ! -d "$PLUGIN_DIR/.git" ]; then
+# ---- Clone plugin from GitHub (skips if already cloned) ----
+if [ ! -d "$PLUGIN_DIR" ]; then
   echo "[setup] Installing git..."
   apk add --no-cache git --quiet
   echo "[setup] Cloning plugin from GitHub..."
   git clone https://github.com/odzk/nuvho-booking-mask-single.git "$PLUGIN_DIR"
 else
-  echo "[setup] Plugin already cloned, pulling latest..."
-  git -C "$PLUGIN_DIR" pull
+  echo "[setup] Plugin already exists, skipping clone."
 fi
 
 # ---- Activate the plugin ----
 echo "[setup] Activating plugin: $PLUGIN_SLUG"
 wp plugin activate "$PLUGIN_SLUG"
 
-# ---- Create a test page with the booking shortcode ----
-echo "[setup] Creating test page..."
-wp post create \
-  --post_type=page \
-  --post_title="Booking Widget Test" \
-  --post_content='[nuvho_booking_mask_single]' \
-  --post_status=publish \
-  --porcelain
-
-# ---- Disable comments on the test page (cleaner UI) ----
-TEST_PAGE_ID=$(wp post list --post_type=page --post_status=publish --name="booking-widget-test" --field=ID --quiet 2>/dev/null || echo "")
-if [ -n "$TEST_PAGE_ID" ]; then
-  wp post update "$TEST_PAGE_ID" --comment_status=closed --ping_status=closed --quiet
+# ---- Create test page if it doesn't exist ----
+if ! wp post list --post_type=page --post_status=publish --name="booking-widget-test" --field=ID --quiet 2>/dev/null | grep -q .; then
+  echo "[setup] Creating test page..."
+  wp post create \
+    --post_type=page \
+    --post_title="Booking Widget Test" \
+    --post_content='[nuvho_booking_mask_single]' \
+    --post_status=publish \
+    --porcelain
+else
+  echo "[setup] Test page already exists, skipping."
 fi
 
 # ---- Set permalink structure ----
