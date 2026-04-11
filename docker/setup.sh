@@ -51,6 +51,18 @@ wp core install \
   --admin_email="$WP_ADMIN_EMAIL" \
   --skip-email
 
+# ---- Clone plugin from GitHub ----
+PLUGIN_DIR="/var/www/html/wp-content/plugins/$PLUGIN_SLUG"
+if [ ! -d "$PLUGIN_DIR/.git" ]; then
+  echo "[setup] Installing git..."
+  apk add --no-cache git --quiet
+  echo "[setup] Cloning plugin from GitHub..."
+  git clone https://github.com/odzk/nuvho-booking-mask-single.git "$PLUGIN_DIR"
+else
+  echo "[setup] Plugin already cloned, pulling latest..."
+  git -C "$PLUGIN_DIR" pull
+fi
+
 # ---- Activate the plugin ----
 echo "[setup] Activating plugin: $PLUGIN_SLUG"
 wp plugin activate "$PLUGIN_SLUG"
