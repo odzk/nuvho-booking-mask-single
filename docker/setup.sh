@@ -52,8 +52,6 @@ fi
 
 # ---- Clone plugin from GitHub (skips if already cloned) ----
 if [ ! -d "$PLUGIN_DIR" ]; then
-  echo "[setup] Installing git..."
-  apk add --no-cache git --quiet
   echo "[setup] Cloning plugin from GitHub..."
   git clone https://github.com/odzk/nuvho-booking-mask-single.git "$PLUGIN_DIR"
 else
