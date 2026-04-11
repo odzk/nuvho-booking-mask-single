@@ -487,58 +487,19 @@ $opacity_options = array(
 
                 <!-- Custom Engine Settings -->
                 <div id="custom-engine-settings" class="nuvho-settings-card" style="<?php echo ($settings['option'] === 'Custom') ? 'display: block;' : 'display: none;'; ?>">
-                    <h2>Custom Booking Engine Settings</h2>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">Anthropic API Key:</th>
-                            <td>
-                                <input type="password" name="nuvho_booking_mask_settings[anthropic_api_key]" value="<?php echo esc_attr(isset($settings['anthropic_api_key']) ? $settings['anthropic_api_key'] : ''); ?>" class="regular-text" autocomplete="off" />
-                                <p class="description">Required for auto-detecting booking engine parameters. <a href="https://console.anthropic.com/" target="_blank">Get API key</a></p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Fetch Parameters:</th>
-                            <td>
-                                <button type="button" id="nuvho-fetch-params-btn" class="button button-secondary">Fetch Parameters</button>
-                                <span id="nuvho-fetch-status" style="margin-left:10px;"></span>
-                                <p class="description">Analyzes the URL above to detect booking engine parameters automatically.</p>
-                            </td>
-                        </tr>
-                        <tr id="nuvho-sample-url-row" style="display:none;">
-                            <th scope="row">Sample Booking URL:</th>
-                            <td>
-                                <input type="text" id="nuvho-sample-url" class="regular-text" placeholder="Paste a full booking URL with parameters" />
-                                <button type="button" id="nuvho-parse-sample-btn" class="button button-secondary">Parse URL</button>
-                                <p class="description">If the engine was not recognized, paste a complete booking URL with all query parameters filled in.</p>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <!-- Parameter Editor (populated by AJAX response) -->
-                    <div id="nuvho-param-editor" style="display:none;">
-                        <h3>Detected Parameters</h3>
-                        <p id="nuvho-detected-engine-name" style="font-style:italic;"></p>
-                        <table class="widefat" id="nuvho-param-table">
-                            <thead>
-                                <tr>
-                                    <th>Parameter Name</th>
-                                    <th>Maps To</th>
-                                    <th>Format</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                        <p style="margin-top:10px;">
-                            <label>
-                                <input type="checkbox" id="nuvho-custom-has-promo" name="nuvho_booking_mask_settings[custom_has_promo]" value="1" <?php checked(isset($settings['custom_has_promo']) && $settings['custom_has_promo']); ?> />
-                                Engine supports promo/coupon codes
-                            </label>
-                        </p>
+                    <h2><?php esc_html_e('Custom Booking Engine Settings', 'nuvho-booking-mask'); ?></h2>
+                    <div class="nuvho-coming-soon-box">
+                        <div class="nuvho-coming-soon-icon">🚧</div>
+                        <h3><?php esc_html_e('This feature is coming soon', 'nuvho-booking-mask'); ?></h3>
+                        <p><?php esc_html_e('Custom booking engine support is currently in development. Enter your email below and we\'ll notify you as soon as it\'s available.', 'nuvho-booking-mask'); ?></p>
+                        <div class="nuvho-notify-form-wrap">
+                            <input type="email" id="nuvho-notify-email" class="regular-text" placeholder="<?php esc_attr_e('your@email.com', 'nuvho-booking-mask'); ?>" />
+                            <button type="button" id="nuvho-notify-submit" class="button button-primary">
+                                <?php esc_html_e('Notify Me', 'nuvho-booking-mask'); ?>
+                            </button>
+                        </div>
+                        <p id="nuvho-notify-message" class="nuvho-notify-message" style="display:none;"></p>
                     </div>
-
-                    <!-- Hidden field storing serialized custom config as JSON -->
-                    <input type="hidden" name="nuvho_booking_mask_settings[custom_engine_config]" id="nuvho-custom-engine-config" value="<?php echo esc_attr(isset($settings['custom_engine_config']) ? $settings['custom_engine_config'] : ''); ?>" />
                 </div>
             </div>
 
@@ -700,6 +661,44 @@ $opacity_options = array(
 
 <script>
 jQuery(document).ready(function($) {
+    // Custom engine — notify me
+    $('#nuvho-notify-submit').on('click', function() {
+        var email = $('#nuvho-notify-email').val().trim();
+        var $msg  = $('#nuvho-notify-message');
+        var $btn  = $(this);
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            $msg.removeClass('nuvho-notify-success').addClass('nuvho-notify-error')
+                .text('<?php echo esc_js(__('Please enter a valid email address.', 'nuvho-booking-mask')); ?>')
+                .show();
+            return;
+        }
+
+        $btn.prop('disabled', true).text('<?php echo esc_js(__('Sending…', 'nuvho-booking-mask')); ?>');
+
+        $.post(ajaxurl, {
+            action: 'nuvho_custom_notify',
+            email:  email,
+            nonce:  '<?php echo esc_js(wp_create_nonce('nuvho_custom_notify')); ?>'
+        }, function(response) {
+            if (response.success) {
+                $msg.removeClass('nuvho-notify-error').addClass('nuvho-notify-success')
+                    .text(response.data.message).show();
+                $('#nuvho-notify-email').val('');
+                $btn.text('<?php echo esc_js(__('Sent!', 'nuvho-booking-mask')); ?>');
+            } else {
+                $msg.removeClass('nuvho-notify-success').addClass('nuvho-notify-error')
+                    .text(response.data.message).show();
+                $btn.prop('disabled', false).text('<?php echo esc_js(__('Notify Me', 'nuvho-booking-mask')); ?>');
+            }
+        }).fail(function() {
+            $msg.removeClass('nuvho-notify-success').addClass('nuvho-notify-error')
+                .text('<?php echo esc_js(__('Something went wrong. Please try again.', 'nuvho-booking-mask')); ?>')
+                .show();
+            $btn.prop('disabled', false).text('<?php echo esc_js(__('Notify Me', 'nuvho-booking-mask')); ?>');
+        });
+    });
+
     // Copy shortcode to clipboard
     $('#nuvho-copy-shortcode').on('click', function() {
         var shortcode = $('#nuvho-shortcode-text').text();

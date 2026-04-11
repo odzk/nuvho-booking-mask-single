@@ -251,6 +251,65 @@ class Nuvho_Booking_Mask_Admin {
     }
     
     /**
+     * AJAX handler: notify support when someone requests custom booking engine updates.
+     */
+    public function ajax_custom_notify() {
+        check_ajax_referer('nuvho_custom_notify', 'nonce');
+
+        $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+        if (!is_email($email)) {
+            wp_send_json_error(array('message' => __('Invalid email address.', 'nuvho-booking-mask')));
+        }
+
+        $site_url   = get_site_url();
+        $site_name  = get_bloginfo('name');
+        $admin_mail = get_bloginfo('admin_email');
+        $wp_version = get_bloginfo('version');
+        $php_version = PHP_VERSION;
+        $locale     = get_locale();
+        $plugins    = array();
+
+        if (function_exists('get_plugins')) {
+            foreach (get_plugins() as $file => $data) {
+                $plugins[] = $data['Name'] . ' ' . $data['Version']
+                    . (is_plugin_active($file) ? ' (active)' : ' (inactive)');
+            }
+        }
+
+        $subject = sprintf('[Nuvho] Custom Booking Engine Interest — %s', $site_name);
+
+        $body  = "A user has expressed interest in the Custom Booking Engine feature.\n\n";
+        $body .= "Notification Email : {$email}\n\n";
+        $body .= "--- Site Information ---\n";
+        $body .= "Site Name   : {$site_name}\n";
+        $body .= "Site URL    : {$site_url}\n";
+        $body .= "Admin Email : {$admin_mail}\n";
+        $body .= "Locale      : {$locale}\n\n";
+        $body .= "--- Environment ---\n";
+        $body .= "WordPress   : {$wp_version}\n";
+        $body .= "PHP         : {$php_version}\n\n";
+        $body .= "--- Active & Inactive Plugins ---\n";
+        $body .= implode("\n", $plugins) . "\n";
+
+        $sent = wp_mail(
+            'support@nuvho.com',
+            $subject,
+            $body,
+            array('Content-Type: text/plain; charset=UTF-8')
+        );
+
+        if ($sent) {
+            wp_send_json_success(array(
+                'message' => __("Thanks! We'll notify you at {$email} when this feature launches.", 'nuvho-booking-mask')
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => __('Could not send your request. Please try again later.', 'nuvho-booking-mask')
+            ));
+        }
+    }
+
+    /**
      * Export reports as CSV
      */
     public function export_reports() {
