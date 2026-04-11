@@ -49,6 +49,7 @@ services:
   wpcli:
     image: wordpress:cli
     restart: on-failure
+    user: root
     depends_on:
       db:
         condition: service_healthy
