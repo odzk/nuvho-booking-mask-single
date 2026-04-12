@@ -147,6 +147,8 @@ class Nuvho_Booking_Mask {
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
         $this->loader->add_action('admin_menu', $plugin_admin, 'add_plugin_admin_menu');
         $this->loader->add_action('admin_init', $plugin_admin, 'register_settings');
+        $this->loader->add_action('wp_ajax_nuvho_fetch_engine_params', $plugin_admin, 'ajax_fetch_engine_params');
+        $this->loader->add_action('wp_ajax_nuvho_custom_notify', $plugin_admin, 'ajax_custom_notify');
     }
 
     /**
@@ -161,6 +163,7 @@ class Nuvho_Booking_Mask {
 
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
+        $this->loader->add_action('wp_head', $plugin_public, 'inject_custom_css');
         $this->loader->add_shortcode('nuvho_booking_mask_single', $plugin_public, 'display_booking_mask');
     }
 

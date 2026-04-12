@@ -20,45 +20,11 @@
 // Set default values for guest counts
 $adults = 2;
 $children = 0;
-
-$opacity = str_replace('%', '', $settings['background_opacity']) / 100;
-// Calculate background color with opacity
-$bg_color = $settings['background_color'];
-$background_color_with_opacity = $bg_color; // Default
-
-// If it's a hex color, convert to rgba
-if (preg_match('/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i', $bg_color, $matches)) {
-    $r = hexdec($matches[1]);
-    $g = hexdec($matches[2]);
-    $b = hexdec($matches[3]);
-    $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
-} 
-// If it's already rgba, just update the alpha
-elseif (preg_match('/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d\.]+\)$/i', $bg_color, $matches)) {
-    $r = $matches[1];
-    $g = $matches[2];
-    $b = $matches[3];
-    $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
-}
-// If it's rgb, convert to rgba
-elseif (preg_match('/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i', $bg_color, $matches)) {
-    $r = $matches[1];
-    $g = $matches[2];
-    $b = $matches[3];
-    $background_color_with_opacity = "rgba($r, $g, $b, $opacity)";
-}
-
-$accent_color = esc_attr($background_color_with_opacity);
 ?>
-<div class="nuvho-booking-mask-container" 
-     style="background-color: <?php echo esc_attr($background_color_with_opacity) ?>; 
-            opacity: <?php echo esc_attr($opacity); ?>; 
-            border-radius: <?php echo esc_attr($border_radius); ?>;">
-    
-    <div class="nuvho-booking-form" 
-         style="color: <?php echo esc_attr($settings['font_color']); ?>;
-                font-family: <?php echo $settings['font'] === 'Default' ? 'inherit' : esc_attr($settings['font']); ?>;">
-        
+<div class="nuvho-booking-mask-container">
+
+    <div class="nuvho-booking-form">
+
         <form id="nuvho-booking-form" action="<?php echo esc_url($settings['url']); ?>" method="get" target="_blank">
             <!-- Hidden fields for the booking engine configuration -->
             <?php if ($settings['option'] === 'Accor') : ?>
@@ -93,19 +59,15 @@ $accent_color = esc_attr($background_color_with_opacity);
                 <?php if (!empty($settings['contextparam'])) : ?>
                     <input type="hidden" name="contextparam" value="<?php echo esc_attr($settings['contextparam']); ?>">
                 <?php endif; ?>
-            <?php elseif ($settings['option'] === 'Simple Booking v1') : ?>
-                <input type="hidden" name="hid" value="<?php echo esc_attr($settings['hotel_id']); ?>">
-                <input type="hidden" name="lang" value="<?php echo esc_attr(strtoupper(substr(explode(' ', $settings['language'])[0], 0, 2))); ?>">
-                <input type="hidden" name="cur" value="<?php echo esc_attr($settings['currency']); ?>">
-                <?php if (!empty($settings['coupon']) && empty($settings['show_promo_code'])) : ?>
-                    <input type="hidden" name="coupon" value="<?php echo esc_attr($settings['coupon']); ?>">
-                <?php endif; ?>
             <?php elseif ($settings['option'] === 'Simple Booking v2') : ?>
                 <input type="hidden" name="lang" value="<?php echo esc_attr(strtoupper(substr(explode(' ', $settings['language'])[0], 0, 2))); ?>">
                 <input type="hidden" name="cur" value="<?php echo esc_attr($settings['currency']); ?>">
                 <?php if (!empty($settings['coupon']) && empty($settings['show_promo_code'])) : ?>
                     <input type="hidden" name="coupon" value="<?php echo esc_attr($settings['coupon']); ?>">
                 <?php endif; ?>
+            <?php elseif ($settings['option'] === 'Custom') : ?>
+                <!-- Custom engine: URL is built entirely by JS override -->
+                <input type="hidden" name="hotel_id" value="<?php echo esc_attr($settings['hotel_id']); ?>">
             <?php else : ?>
                 <input type="hidden" name="hotel_id" value="<?php echo esc_attr($settings['hotel_id']); ?>">
                 <input type="hidden" name="lang" value="<?php echo esc_attr(strtolower(explode(' ', $settings['language'])[0])); ?>">
@@ -129,23 +91,54 @@ $accent_color = esc_attr($background_color_with_opacity);
                     <label><?php esc_html_e('Persons:', 'nuvho-booking-mask'); ?></label>
                     <!-- Trigger button that shows current selection -->
                     <div class="nuvho-guest-summary">
-                    <button type="button" class="nuvho-guest-trigger" style="color: #333;">
-                    <span class="nuvho-guest-count" style="color: #333;">
+                    <button type="button" class="nuvho-guest-trigger">
+                    <span class="nuvho-guest-count">
                         <strong class="nuvho-adults-count">2</strong> 
-                        <span style="color: #333;"><?php esc_html_e('ADULTS', 'nuvho-booking-mask'); ?></span>
+                        <span><?php esc_html_e('ADULTS', 'nuvho-booking-mask'); ?></span>
                         + <strong class="nuvho-kids-count">0</strong> 
-                        <span style="color: #333;"><?php esc_html_e('KIDS', 'nuvho-booking-mask'); ?></span>
+                        <span><?php esc_html_e('KIDS', 'nuvho-booking-mask'); ?></span>
                     </span>
                     <span class="nuvho-selector-toggle">&#9660;</span>
                 </button>
                     </div>
                     
                     <!-- Modal that appears when clicked -->
-<!-- Modal that appears when clicked -->
+<?php $guest_type = isset($settings['guest_selection_type']) ? $settings['guest_selection_type'] : 'stepper'; ?>
+<?php if ($guest_type === 'dropdown') : ?>
+<!-- Dropdown variant -->
+<div class="nuvho-guest-modal nuvho-guest-modal-dropdown" id="nuvho-guest-modal">
+    <div class="nuvho-modal-content">
+        <div class="nuvho-room-title"><?php esc_html_e('Guests', 'nuvho-booking-mask'); ?></div>
+        <div class="nuvho-dropdown-row">
+            <div class="nuvho-dropdown-group">
+                <label><?php esc_html_e('Adults', 'nuvho-booking-mask'); ?></label>
+                <select class="nuvho-guest-dropdown" id="nuvho-adults-dropdown" data-target="adults">
+                    <?php for ($i = 1; $i <= 10; $i++) : ?>
+                        <option value="<?php echo $i; ?>" <?php selected($adults, $i); ?>><?php echo $i; ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <div class="nuvho-dropdown-group">
+                <label><?php esc_html_e('Kids', 'nuvho-booking-mask'); ?></label>
+                <select class="nuvho-guest-dropdown" id="nuvho-kids-dropdown" data-target="kids">
+                    <?php for ($i = 0; $i <= 10; $i++) : ?>
+                        <option value="<?php echo $i; ?>" <?php selected($children, $i); ?>><?php echo $i; ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+        </div>
+        <div class="nuvho-modal-buttons">
+            <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
+            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
+        </div>
+    </div>
+</div>
+<?php else : ?>
+<!-- Stepper variant (default) -->
 <div class="nuvho-guest-modal" id="nuvho-guest-modal">
     <div class="nuvho-modal-content">
         <div class="nuvho-room-title"><?php esc_html_e('Guests', 'nuvho-booking-mask'); ?></div>
-        
+
         <!-- Adults selection -->
         <div class="nuvho-guest-row">
             <div class="nuvho-guest-label">
@@ -153,15 +146,15 @@ $accent_color = esc_attr($background_color_with_opacity);
                 <span class="nuvho-label-suffix"><?php echo esc_html(((int)$adults === 1) ? __('Adult', 'nuvho-booking-mask') : __('Adults', 'nuvho-booking-mask')); ?></span>
             </div>
             <div class="nuvho-stepper-controls">
-                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults" style="background-color: <?php echo $accent_color; ?>;">
+                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="adults">
                     <span class="nuvho-btn-icon">−</span>
                 </button>
-                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults" style="background-color: <?php echo $accent_color; ?>;">
+                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="adults">
                     <span class="nuvho-btn-icon">+</span>
                 </button>
             </div>
         </div>
-        
+
         <!-- Kids selection -->
         <div class="nuvho-guest-row">
             <div class="nuvho-guest-label">
@@ -169,22 +162,23 @@ $accent_color = esc_attr($background_color_with_opacity);
                 <span class="nuvho-label-suffix"><?php echo esc_html(((int)$children === 1) ? __('Kid', 'nuvho-booking-mask') : __('Kids', 'nuvho-booking-mask')); ?></span>
             </div>
             <div class="nuvho-stepper-controls">
-                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids" style="background-color: <?php echo $accent_color; ?>;">
+                <button type="button" class="nuvho-circle-btn nuvho-decrease" data-target="kids">
                     <span class="nuvho-btn-icon">−</span>
                 </button>
-                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids" style="background-color: <?php echo $accent_color; ?>;">
+                <button type="button" class="nuvho-circle-btn nuvho-increase" data-target="kids">
                     <span class="nuvho-btn-icon">+</span>
                 </button>
             </div>
         </div>
-        
+
         <!-- Modal buttons -->
         <div class="nuvho-modal-buttons">
             <button type="button" class="nuvho-cancel-btn"><?php esc_html_e('Cancel', 'nuvho-booking-mask'); ?></button>
-            <button type="button" class="nuvho-done-btn" style="background-color: <?php echo $accent_color; ?>;"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
+            <button type="button" class="nuvho-done-btn"><?php esc_html_e('Done', 'nuvho-booking-mask'); ?></button>
         </div>
     </div>
 </div>
+<?php endif; ?>
                     
                     <!-- Hidden input fields for form submission -->
                     <input type="hidden" id="nuvho-adults-input" name="adults" value="2">
@@ -192,7 +186,13 @@ $accent_color = esc_attr($background_color_with_opacity);
                 </div>
                 
                 <!-- 3. Promo code field - always in third position if enabled -->
-                <?php if (isset($settings['show_promo_code']) && $settings['show_promo_code'] && (strpos($settings['option'], 'Simple Booking') !== false)) : ?>
+                <?php
+                $show_promo = isset($settings['show_promo_code']) && $settings['show_promo_code'] && (strpos($settings['option'], 'Simple Booking') !== false || $settings['option'] === 'Little Hotelier');
+                if ($settings['option'] === 'Custom' && isset($settings['custom_has_promo']) && $settings['custom_has_promo']) {
+                    $show_promo = true;
+                }
+                ?>
+                <?php if ($show_promo) : ?>
                 <div class="nuvho-form-field nuvho-promo-field">
                     <label for="nuvho-promo"><?php esc_html_e('Promo Code', 'nuvho-booking-mask'); ?></label>
                     <input type="text" id="nuvho-promo" name="coupon" placeholder="<?php esc_attr_e('Enter promo code', 'nuvho-booking-mask'); ?>">
@@ -201,11 +201,7 @@ $accent_color = esc_attr($background_color_with_opacity);
                 
                 <!-- 4. Submit button - always last -->
                 <div class="nuvho-form-field nuvho-submit-field">
-                    <button type="submit" 
-                            style="background-color: <?php echo esc_attr($settings['button_color']); ?>; 
-                                   color: <?php echo esc_attr($settings['button_text_color']); ?>; 
-                                   border-radius: <?php echo esc_attr($button_radius); ?>;"
-                            onclick="trackBookingClick()"><?php echo esc_html($settings['button_text']); ?></button>
+                    <button type="submit" onclick="trackBookingClick()"><?php echo esc_html($settings['button_text']); ?></button>
                 </div>
             </div>
         </form>
@@ -213,57 +209,38 @@ $accent_color = esc_attr($background_color_with_opacity);
 </div>
 
 <script>
-    // Update guest number displays in modal
+    // Update guest number displays in modal (stepper mode only)
     document.addEventListener('DOMContentLoaded', function() {
-        // Get modal elements
-        const modal = document.getElementById('nuvho-guest-modal');
-        const adultsInput = document.getElementById('nuvho-adults-input');
-        const kidsInput = document.getElementById('nuvho-kids-input');
-        const adultsDisplay = document.querySelector('.nuvho-adults-number');
-        const kidsDisplay = document.querySelector('.nuvho-kids-number');
-        
-        // Handle increase/decrease buttons
-        const increaseButtons = document.querySelectorAll('.nuvho-increase');
-        const decreaseButtons = document.querySelectorAll('.nuvho-decrease');
-        
-        increaseButtons.forEach(button => {
+        // Skip if in dropdown mode
+        if (document.querySelector('.nuvho-guest-modal-dropdown')) return;
+
+        var adultsInput = document.getElementById('nuvho-adults-input');
+        var kidsInput = document.getElementById('nuvho-kids-input');
+        var adultsDisplay = document.querySelector('.nuvho-adults-number');
+        var kidsDisplay = document.querySelector('.nuvho-kids-number');
+
+        document.querySelectorAll('.nuvho-increase').forEach(function(button) {
             button.addEventListener('click', function() {
-                const target = this.getAttribute('data-target');
+                var target = this.getAttribute('data-target');
                 if (target === 'adults') {
-                    let currentValue = parseInt(adultsInput.value) || 1;
-                    if (currentValue < 10) { // Set a reasonable max
-                        currentValue++;
-                        adultsInput.value = currentValue;
-                        adultsDisplay.textContent = currentValue;
-                    }
+                    var val = parseInt(adultsInput.value) || 1;
+                    if (val < 10) { adultsInput.value = ++val; adultsDisplay.textContent = val; }
                 } else if (target === 'kids') {
-                    let currentValue = parseInt(kidsInput.value) || 0;
-                    if (currentValue < 10) { // Set a reasonable max
-                        currentValue++;
-                        kidsInput.value = currentValue;
-                        kidsDisplay.textContent = currentValue;
-                    }
+                    var val = parseInt(kidsInput.value) || 0;
+                    if (val < 10) { kidsInput.value = ++val; kidsDisplay.textContent = val; }
                 }
             });
         });
-        
-        decreaseButtons.forEach(button => {
+
+        document.querySelectorAll('.nuvho-decrease').forEach(function(button) {
             button.addEventListener('click', function() {
-                const target = this.getAttribute('data-target');
+                var target = this.getAttribute('data-target');
                 if (target === 'adults') {
-                    let currentValue = parseInt(adultsInput.value) || 1;
-                    if (currentValue > 1) { // Minimum 1 adult
-                        currentValue--;
-                        adultsInput.value = currentValue;
-                        adultsDisplay.textContent = currentValue;
-                    }
+                    var val = parseInt(adultsInput.value) || 1;
+                    if (val > 1) { adultsInput.value = --val; adultsDisplay.textContent = val; }
                 } else if (target === 'kids') {
-                    let currentValue = parseInt(kidsInput.value) || 0;
-                    if (currentValue > 0) { // Minimum 0 kids
-                        currentValue--;
-                        kidsInput.value = currentValue;
-                        kidsDisplay.textContent = currentValue;
-                    }
+                    var val = parseInt(kidsInput.value) || 0;
+                    if (val > 0) { kidsInput.value = --val; kidsDisplay.textContent = val; }
                 }
             });
         });

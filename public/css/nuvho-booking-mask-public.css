@@ -7,12 +7,17 @@
     padding: 20px;
     margin: 20px 0;
     box-sizing: border-box;
+    background-color: rgba(76, 115, 128, 1);
+    border-radius: 0;
+    opacity: 1;
 }
 
 /* Form layout */
 .nuvho-booking-form {
     max-width: 1200px;
     margin: 0 auto;
+    color: #ffffff;
+    font-family: inherit;
 }
 
 .nuvho-form-row {
@@ -109,10 +114,22 @@
     border-radius: 4px;
 }
 
-.daterangepicker td.active, 
-.daterangepicker td.active:hover,
-.daterangepicker td.in-range.active {
+.daterangepicker td.active {
+    background-color: #4c7380;
+    border-color: #4c7380;
+    color: #ffffff;
+}
 
+.daterangepicker td.active:hover {
+    background-color: #4c7380;
+    border-color: #4c7380;
+    color: #ffffff;
+}
+
+.daterangepicker td.in-range.active {
+    background-color: #4c7380;
+    border-color: #4c7380;
+    color: #ffffff;
 }
 
 .daterangepicker td.in-range {
@@ -171,6 +188,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #4c7380;
+    color: #ffffff;
+    border-radius: 0;
 }
 
 /* Original stepper controls - keeping for backward compatibility */
@@ -406,6 +426,37 @@
 
 .nuvho-done-btn:hover {
     background: #3a6a7c;
+}
+
+/* Dropdown guest selector variant */
+.nuvho-dropdown-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.nuvho-dropdown-group {
+    flex: 1;
+}
+
+.nuvho-dropdown-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.nuvho-guest-dropdown {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #fff;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
 /* Responsive adjustments */
