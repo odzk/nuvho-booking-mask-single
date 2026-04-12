@@ -4,7 +4,7 @@
  * Plugin Name:       Nuvho Booking Mask (Single)
  * Plugin URI:        https://support.herobe.com/nuvho-booking-mask/
  * Description:       A lightweight, fully customizable booking widget for single-property hotels. Drop it anywhere on your site using a shortcode and let guests check availability in seconds — no coding required.
- * Version:           2.1.3
+ * Version:           2.1.4
  * Author:            Odysseus Ambut / Herobe IP Pty Ltd
  * Author URI:        https://herobe.com
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ if (!defined('WPINC')) {
 }
 
 // Define plugin constants
-define('NUVHO_BOOKING_MASK_VERSION', '2.1.3');
+define('NUVHO_BOOKING_MASK_VERSION', '2.1.4');
 define('NUVHO_BOOKING_MASK_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('NUVHO_BOOKING_MASK_PLUGIN_URL', plugin_dir_url(__FILE__));
 
