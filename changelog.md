@@ -1,3 +1,6 @@
+#2.1.5
+- Fix buttons customization not setting from admin dashboard.
+
 #2.1.4
 - 6 New Booking Engines. Support has been added for GuestCentric, Beds24, Little Hotelier, Bookassist, Cubilis, and Clock PMS. If your property uses one of these systems, you can now connect directly from the plugin settings.
 - Custom Booking Engine. Can't find your booking system in the list? The new Custom Engine option lets you connect any booking platform. Contact us to get set up.
