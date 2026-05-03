@@ -252,15 +252,25 @@ class Nuvho_Booking_Mask_Public {
             }
         }
 
+        $button_radius = '0';
+        if (isset($settings['button_border_radius'])) {
+            if ($settings['button_border_radius'] === 'Rounded') {
+                $button_radius = '8px';
+            } elseif ($settings['button_border_radius'] === 'Pill') {
+                $button_radius = '20px';
+            }
+        }
+
         echo '<style type="text/css">'
             . '.nuvho-booking-mask-container{'
             . 'background-color:' . $rgba . ';'
             . 'border-radius:' . $border_radius . ';'
             . '}'
             . '.nuvho-booking-form{color:' . $font_color . ';}'
-            . '.nuvho-booking-form .nuvho-submit-field button{'
+            . '.nuvho-booking-form .nuvho-submit-field button[type="submit"]{'
             . 'background-color:' . $btn_color . ';'
             . 'color:' . $btn_text . ';'
+            . 'border-radius:' . $button_radius . ';'
             . '}'
             . '</style>' . "\n";
     }

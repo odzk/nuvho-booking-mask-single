@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Nuvho Booking Mask — Local Staging Environment
 # Usage:
 #   Start:   docker compose up -d
